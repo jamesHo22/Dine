@@ -42,7 +42,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
             super(itemView);
             //This references the textView on the card
             titleTv = itemView.findViewById(R.id.info_text);
-            cardNumberTv = itemView.findViewById(R.id.card_number);
             mainIV = itemView.findViewById(R.id.main_image_view);
             descriptionTv = itemView.findViewById(R.id.description);
             itemView.setOnClickListener(this);

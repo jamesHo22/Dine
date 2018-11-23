@@ -8,6 +8,12 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.widget.Toast;
 
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
 
 public class FoodActivity extends AppCompatActivity implements ItemAdapter.ItemAdapterOnClickHandler {
 
@@ -20,25 +26,45 @@ public class FoodActivity extends AppCompatActivity implements ItemAdapter.ItemA
     private RecyclerView.LayoutManager mLayoutManager;
     private Toast mToast;
 
+    // Add Firestore Reference
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference itemRef = db.collection("items");
+    private FirestoreRecyclerAdapter mFirestoreAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food);
-        mRecyclerView = findViewById(R.id.rv_show_menu_items);
+        setUpRecyclerView();
+//        mRecyclerView = findViewById(R.id.rv_show_menu_items);
+//
+//        // use this setting to improve performance if you know that changes
+//        // in content do not change the layout size of the RecyclerView
+//        mRecyclerView.setHasFixedSize(true);
+//
+//        // use a linear layout manager
+//        mLayoutManager = new LinearLayoutManager(this);
+//        mRecyclerView.setLayoutManager(mLayoutManager);
+//
+//        // specify an adapter (see also next example)
+//        //FIXME: make an adapter
+//        mAdapter = new ItemAdapter(this);
+//        mRecyclerView.setAdapter(mAdapter);
+    }
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(true);
+    private void setUpRecyclerView() {
+        Query query = itemRef.orderBy("price", Query.Direction.DESCENDING);
+        FirestoreRecyclerOptions<Item> options =  new FirestoreRecyclerOptions.Builder<Item>()
+                .setQuery(query, Item.class)
+                .build();
 
-        // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        mFirestoreAdapter = new FirestoreItemAdapter(options);
+        RecyclerView recyclerView = findViewById(R.id.rv_show_menu_items);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(mFirestoreAdapter);
 
-        // specify an adapter (see also next example)
-        //FIXME: make an adapter
-        mAdapter = new ItemAdapter(this);
-        mRecyclerView.setAdapter(mAdapter);
-
+        // Set itemtouch helper to recycler view
         //Add the swiping cards functionality using the simple callback
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
@@ -62,8 +88,19 @@ public class FoodActivity extends AppCompatActivity implements ItemAdapter.ItemA
 
                 Toast.makeText(getApplicationContext(), "You swiped " + mDirection + "on card " + String.valueOf(position), Toast.LENGTH_SHORT).show();
             }
-        }).attachToRecyclerView(mRecyclerView);
+        }).attachToRecyclerView(recyclerView);
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mFirestoreAdapter.startListening();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mFirestoreAdapter.stopListening();
     }
 
     /**
