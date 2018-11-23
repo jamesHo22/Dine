@@ -30,8 +30,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
-//TODO: Add Google FoodActivity
-
 public class SignInActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 123;

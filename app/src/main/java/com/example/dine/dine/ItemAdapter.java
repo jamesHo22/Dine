@@ -71,7 +71,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(@NonNull ItemAdapter.ItemViewHolder holder, int position) {
-        // FIXME: get the names of the items from FireStore
         holder.titleTv.setText("Get title from firestore");
         holder.cardNumberTv.setText(String.valueOf(position));
         holder.mainIV.setImageResource(R.mipmap.big_mac);

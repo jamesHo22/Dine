@@ -11,13 +11,15 @@ import android.widget.Toast;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 
 public class FoodActivity extends AppCompatActivity implements ItemAdapter.ItemAdapterOnClickHandler {
 
-    // TODO(1): Display Firestore data in recyclerviews
+    // TODO(1): (Completed) Display Firestore data in recyclerviews
+    // TODO(1.1): (Completed) Add click handlers
     // TODO(2): Add Location services and use that to switch to different Firestore collections/documents
     // TODO(3): Add Firebase Cloud Messaging to update the web-client based on location
 
@@ -36,33 +38,23 @@ public class FoodActivity extends AppCompatActivity implements ItemAdapter.ItemA
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food);
         setUpRecyclerView();
-//        mRecyclerView = findViewById(R.id.rv_show_menu_items);
-//
-//        // use this setting to improve performance if you know that changes
-//        // in content do not change the layout size of the RecyclerView
-//        mRecyclerView.setHasFixedSize(true);
-//
-//        // use a linear layout manager
-//        mLayoutManager = new LinearLayoutManager(this);
-//        mRecyclerView.setLayoutManager(mLayoutManager);
-//
-//        // specify an adapter (see also next example)
-//        //FIXME: make an adapter
-//        mAdapter = new ItemAdapter(this);
-//        mRecyclerView.setAdapter(mAdapter);
     }
 
+    /**
+     * sets up the recyclerview.
+     */
     private void setUpRecyclerView() {
+        // Create a query when requesting data from firestore
         Query query = itemRef.orderBy("price", Query.Direction.DESCENDING);
         FirestoreRecyclerOptions<Item> options =  new FirestoreRecyclerOptions.Builder<Item>()
                 .setQuery(query, Item.class)
                 .build();
-
         mFirestoreAdapter = new FirestoreItemAdapter(options);
         RecyclerView recyclerView = findViewById(R.id.rv_show_menu_items);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mFirestoreAdapter);
+
 
         // Set itemtouch helper to recycler view
         //Add the swiping cards functionality using the simple callback
@@ -74,6 +66,12 @@ public class FoodActivity extends AppCompatActivity implements ItemAdapter.ItemA
                 // do not allow moving
             }
 
+            /**
+             * When swiped left, it will delete the item from the database
+             * FIXME: instead of deleting from the database, it will move the item to another collection where all the disliked items are held
+             * @param viewHolder
+             * @param direction
+             */
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 // Do something when the item is swiped
@@ -84,11 +82,21 @@ public class FoodActivity extends AppCompatActivity implements ItemAdapter.ItemA
                     mDirection = "right";
                 } else {
                     mDirection = "left";
+                    ((FirestoreItemAdapter) mFirestoreAdapter).deleteItem(position);
                 }
 
                 Toast.makeText(getApplicationContext(), "You swiped " + mDirection + "on card " + String.valueOf(position), Toast.LENGTH_SHORT).show();
             }
         }).attachToRecyclerView(recyclerView);
+
+        ((FirestoreItemAdapter) mFirestoreAdapter).setOnItemClickListener(new FirestoreItemAdapter.onItemClickListener() {
+            @Override
+            public void onItemClick(DocumentSnapshot documentSnapshot, int position) {
+                // TODO: watch firestore tutorials to see what you can do with document snapshots
+                String id = documentSnapshot.getId();
+                Toast.makeText(FoodActivity.this, "Position " + String.valueOf(position) + " ID: " + id, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
