@@ -23,6 +23,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -118,13 +119,20 @@ public class SignInActivity extends AppCompatActivity {
         super.onStart();
         // Check if there is a firebase currentUser.
         FirebaseUser currentUser = mAuth.getCurrentUser();
+        currentUser.getIdToken(false).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
+            @Override
+            public void onSuccess(GetTokenResult getTokenResult) {
+                // TODO: use this to determine the UI of the app.
+                Log.d(TAG, "onSuccess: LOLOL " + getTokenResult.getClaims().toString());
+            }
+        });
 
 //        // Check if an existing user is signed in
 //        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
 
         if (currentUser != null) {
             //TODO: Display the main page
-            Log.v(TAG, "User siged in " + currentUser.toString());
+            Log.v(TAG, "User signed in " + currentUser.toString());
         } else {
             Log.v(TAG, "No user signed in");
             // TODO: display the sign in page

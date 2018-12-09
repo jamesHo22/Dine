@@ -33,5 +33,4 @@
         android:text="@string/make_data"
         android:id="@+id/make_data"/>
 
-
 </LinearLayout>

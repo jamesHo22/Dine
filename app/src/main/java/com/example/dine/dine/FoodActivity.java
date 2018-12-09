@@ -1,31 +1,34 @@
 package com.example.dine.dine;
 
-import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 
-public class FoodActivity extends AppCompatActivity implements ItemAdapter.ItemAdapterOnClickHandler {
+public class FoodActivity extends AppCompatActivity {
 
     // TODO(1): (Completed) Display Firestore data in recyclerviews
     // TODO(1.1): (Completed) Add click handlers
     // TODO(2): Add Location services and use that to switch to different Firestore collections/documents
     // TODO(3): Add Firebase Cloud Messaging to update the web-client based on location
-
-    private RecyclerView mRecyclerView;
-    private ItemAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    // TODO(4): check for google play services in onCreate and onResume (https://firebase.google.com/docs/cloud-messaging/android/client#sample-play)
+    // TODO(5): Make a class that handles the firebase tokens. Sending to server/when they reset.
     private Toast mToast;
 
     // Add Firestore Reference
@@ -38,6 +41,23 @@ public class FoodActivity extends AppCompatActivity implements ItemAdapter.ItemA
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food);
         setUpRecyclerView();
+
+        // Get Firebase token
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("Token", "getInstanceId failed", task.getException());
+                            return;
+                        }
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+                        // Log token
+                        Log.d("Token", token);
+                    }
+                });
+
     }
 
     /**
@@ -109,20 +129,5 @@ public class FoodActivity extends AppCompatActivity implements ItemAdapter.ItemA
     protected void onStop() {
         super.onStop();
         mFirestoreAdapter.stopListening();
-    }
-
-    /**
-     * Is an implementation of the onClick method in ItemAdapterOnClickHandler
-     * Method will display a toast
-     * @param testItem
-     */
-    @Override
-    public void onClick(String testItem) {
-        Context context = this;
-        if (mToast != null) {
-            mToast.cancel();
-        }
-        mToast = Toast.makeText(context, testItem, Toast.LENGTH_SHORT);
-        mToast.show();
     }
 }
