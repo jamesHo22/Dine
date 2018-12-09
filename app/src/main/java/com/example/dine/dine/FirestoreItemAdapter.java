@@ -69,7 +69,7 @@ public class FirestoreItemAdapter extends FirestoreRecyclerAdapter<Item, Firesto
         TextView priceTv;
         TextView descriptionTv;
 
-        public FirestoreItemHolder(View itemView) {
+        public FirestoreItemHolder(final View itemView) {
             super(itemView);
 
             //This references the textView on the card
@@ -82,7 +82,7 @@ public class FirestoreItemAdapter extends FirestoreRecyclerAdapter<Item, Firesto
                 public void onClick(View v) {
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION && mListener != null) {
-                        mListener.onItemClick(getSnapshots().getSnapshot(position), position);
+                        mListener.onItemClick(getSnapshots().getSnapshot(position), position, itemView);
                     }
                 }
             });
@@ -94,7 +94,7 @@ public class FirestoreItemAdapter extends FirestoreRecyclerAdapter<Item, Firesto
      */
     public interface onItemClickListener {
         // Change this to change kind of data you want to send to activity
-        void onItemClick(DocumentSnapshot documentSnapshot, int position);
+        void onItemClick(DocumentSnapshot documentSnapshot, int position, View itemView);
     }
 
     public void setOnItemClickListener(onItemClickListener listener) {

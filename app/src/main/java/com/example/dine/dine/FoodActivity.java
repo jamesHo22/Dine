@@ -7,6 +7,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -36,7 +38,9 @@ public class FoodActivity extends AppCompatActivity {
 
     // Add Firestore Reference
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference itemRef = db.collection("items");
+    private CollectionReference itemRef = db.collection("restaurants")
+            .document("aqvUJjyokpta9KyBFz9U")
+            .collection("all_items");
     private FirestoreRecyclerAdapter mFirestoreAdapter;
 
     @Override
@@ -132,14 +136,52 @@ public class FoodActivity extends AppCompatActivity {
             }
         }).attachToRecyclerView(recyclerView);
 
+
+        /**
+         * The onItemClick function does something when it is clicked. It is an interface from FirestoreItemAdapter.onItemClickListener()
+         * that must be overridden.
+         * The one below hides and shows the order item button.
+         */
         ((FirestoreItemAdapter) mFirestoreAdapter).setOnItemClickListener(new FirestoreItemAdapter.onItemClickListener() {
             @Override
-            public void onItemClick(DocumentSnapshot documentSnapshot, int position) {
+            public void onItemClick(final DocumentSnapshot documentSnapshot, int position, View itemView) {
                 // TODO: watch firestore tutorials to see what you can do with document snapshots
                 String id = documentSnapshot.getId();
                 Toast.makeText(FoodActivity.this, "Position " + String.valueOf(position) + " ID: " + id, Toast.LENGTH_LONG).show();
+
+                // Add ability to hide and show order button depending on if the user has clicked the particular item.
+                Button orderButton = itemView.findViewById(R.id.order_dish);
+                int visibility = orderButton.getVisibility();
+                if (visibility == View.GONE) {
+                    orderButton.setVisibility(View.VISIBLE);
+                } else {
+                    orderButton.setVisibility(View.GONE);
+                }
+
+                /**
+                 * When the button is clicked, call the function to move the data that was clicked on to the "current_orders" part of the
+                 * database.
+                 */
+                orderButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        moveItemToCurrentOrders(documentSnapshot);
+                    }
+                });
+
             }
         });
+    }
+
+    /**
+     * moves the documentSnapshot to "current_orders" path
+     * @param documentSnapshot is the Firestore document snapshot passed from the order.
+     */
+    private void moveItemToCurrentOrders(DocumentSnapshot documentSnapshot) {
+        db.collection("restaurants")
+                .document("aqvUJjyokpta9KyBFz9U")
+                .collection("current_orders").document(documentSnapshot.getId())
+                .set(documentSnapshot.getData());
     }
 
     @Override
