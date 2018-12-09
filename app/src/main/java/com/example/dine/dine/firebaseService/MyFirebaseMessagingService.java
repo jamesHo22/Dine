@@ -9,9 +9,6 @@ import static android.content.ContentValues.TAG;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    public MyFirebaseMessagingService() {
-    }
-
     /**
      * Called if InstanceID token is updated. This may occur if the security of
      * the previous token had been compromised. Note that this is called when the InstanceID token
@@ -28,6 +25,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         super.onNewToken(token);
     }
 
+    /**
+     * onMessageReceived decides what to do when a notification is received.
+     * It, however, is not called when the app is in the background. These notifications are delivered to the
+     * system tray
+     * Messages with notification and data payload, foreground and background. Notfication is delivered to device system tray
+     * data payload is delivered in the extras of the indent of your launcher activity.
+     * @param remoteMessage is the message sent from FCM
+     */
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // ...

@@ -19,6 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 
 public class FoodActivity extends AppCompatActivity {
@@ -29,7 +30,9 @@ public class FoodActivity extends AppCompatActivity {
     // TODO(3): Add Firebase Cloud Messaging to update the web-client based on location
     // TODO(4): check for google play services in onCreate and onResume (https://firebase.google.com/docs/cloud-messaging/android/client#sample-play)
     // TODO(5): Make a class that handles the firebase tokens. Sending to server/when they reset.
+    // TODO(6): Make a way for the client to subscribe to the firebase topic.
     private Toast mToast;
+    private String TAG = this.getClass().getName();
 
     // Add Firestore Reference
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -55,6 +58,26 @@ public class FoodActivity extends AppCompatActivity {
                         String token = task.getResult().getToken();
                         // Log token
                         Log.d("Token", token);
+                    }
+                });
+
+        // Subscribe to a test topic
+        /**
+         * Currently, the following FirebaseMessaging function subscribes to the topic "weather".
+         * It logs "subcribed" if it does so and "failed to subscribe" if it doesn't.
+         * If the topic does not exist, it will create a new topic on the firebase project
+         * Call unsubscribeFromTopic() with the topic name to unsubscribe
+         */
+        FirebaseMessaging.getInstance().subscribeToTopic("weather")
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        String msg = "subscribed";
+                        if (!task.isSuccessful()) {
+                            msg = "failed to subscribe";
+                        }
+                        Log.d(TAG, msg);
+                        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
                     }
                 });
 
