@@ -16,7 +16,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -25,11 +24,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class SignInActivity extends AppCompatActivity {
 
@@ -67,14 +62,6 @@ public class SignInActivity extends AppCompatActivity {
                 signIn();
             }
         });
-        // Set an OnClickListener for making firebase data
-        makeDataButton = findViewById(R.id.make_data);
-        makeDataButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                makeData();
-            }
-        });
 
         // Create google sign in object
         // Configure Google Sign In
@@ -88,44 +75,11 @@ public class SignInActivity extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
     }
 
-    private void makeData() {
-        // Access a cloud firestore instance
-        db = FirebaseFirestore.getInstance();
-        // Create a collection and a document
-        Map<String, Object> user = new HashMap<>();
-        user.put("first", "James");
-        user.put("last", "Ho");
-        user.put("born", 2000);
-
-        // Add a new document with a generated ID
-        db.collection("users")
-                .add(user)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
-                    }
-                });
-    }
-
     @Override
     public void onStart() {
         super.onStart();
         // Check if there is a firebase currentUser.
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        currentUser.getIdToken(false).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
-            @Override
-            public void onSuccess(GetTokenResult getTokenResult) {
-                // TODO: use this to determine the UI of the app.
-                Log.d(TAG, "onSuccess: LOLOL " + getTokenResult.getClaims().toString());
-            }
-        });
 
 //        // Check if an existing user is signed in
 //        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
@@ -133,10 +87,21 @@ public class SignInActivity extends AppCompatActivity {
         if (currentUser != null) {
             //TODO: Display the main page
             Log.v(TAG, "User signed in " + currentUser.toString());
+            getToken(currentUser);
         } else {
             Log.v(TAG, "No user signed in");
             // TODO: display the sign in page
         }
+    }
+
+    private void getToken(FirebaseUser currentUser) {
+        currentUser.getIdToken(false).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
+            @Override
+            public void onSuccess(GetTokenResult getTokenResult) {
+                // TODO: use this to determine the UI of the app.
+                Log.d(TAG, "onSuccess: LOLOL " + getTokenResult.getClaims().toString());
+            }
+        });
     }
 
     private void signIn() {

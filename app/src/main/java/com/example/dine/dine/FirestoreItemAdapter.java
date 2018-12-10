@@ -35,7 +35,8 @@ public class FirestoreItemAdapter extends FirestoreRecyclerAdapter<Item, Firesto
 
         holder.titleTv.setText(model.getTitle());
         holder.descriptionTv.setText(model.getDescription());
-        holder.priceTv.setText(String.valueOf(model.getPrice()));
+        float price = model.getPrice();
+        holder.priceTv.setText("$ " + String.valueOf(price/100));
         // Check if a image url exists for the item
         if (model.getImageUri() != null) {
 

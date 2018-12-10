@@ -4,33 +4,63 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.dine.dine.SignInActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context="com.example.dine.dine.SignInActivity">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:layout_gravity="center">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="284dp"
+            android:textSize="64sp"
+            android:text="Dine"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:fontFamily="@font/lobster"
+            android:textColor="#000000"
+            />
+
+        <TextView
+            android:layout_below="@+id/title"
+            android:layout_width="284dp"
+            android:textSize="24sp"
+            android:text="Let the Dish Find You"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:fontFamily="@font/lobster"
+            android:textColor="#000000"/>
+
+    </RelativeLayout>
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+
+        android:gravity="center"
+        android:text="@string/sign_in_to_start_ordering"/>
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="4dp" />
 
     <Button
+        android:id="@+id/sign_out"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/sign_out"
-        android:id="@+id/sign_out"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/make_data"
-        android:id="@+id/make_data"/>
+        android:layout_gravity="center"
+        android:layout_margin="4dp"
+        android:text="@string/sign_out" />
 
 </LinearLayout>
