@@ -4,5 +4,5 @@
     <string name="make_data">make data</string>
     <string name="hello">Hello!</string>
     <string name="order_dish">Order Dish</string>
-    <string name="sign_in_to_start_ordering">Sign In to Start Ordering</string>
+    <string name="sign_in_to_start_ordering">Sign In to Start Dining</string>
 </resources>
