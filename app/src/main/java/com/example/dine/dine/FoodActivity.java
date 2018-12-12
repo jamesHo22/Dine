@@ -11,6 +11,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -62,10 +64,32 @@ public class FoodActivity extends AppCompatActivity {
     protected PlaceDetectionClient mPlaceDetectionClient;
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            case R.id.action_settings:
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food);
         setUpRecyclerView();
+
+        // Setup toolbar
+        android.support.v7.widget.Toolbar myToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(myToolbar);
 
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
@@ -166,7 +190,8 @@ public class FoodActivity extends AppCompatActivity {
                 String name = likelyPlaces.get(0).getPlace().getName().toString();
                 float probability = likelyPlaces.get(0).getLikelihood();
                 //Toast.makeText(getApplicationContext(), "You are currently at " + name + " with a " + probability + " certainty", Toast.LENGTH_LONG).show();
-                location_tv.setText("Place: " + name + ". Likelyhood: " + String.valueOf(probability));
+                location_tv.setText("Place: " + name + "\nLikelihood: " + probability);
+                Log.d(TAG, "onComplete: ");
                 for (PlaceLikelihood placeLikelihood : likelyPlaces) {
                     Log.i(TAG, String.format("Place '%s' has likelihood: %g",
                             placeLikelihood.getPlace().getName(),
