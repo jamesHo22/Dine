@@ -2,6 +2,7 @@ package com.example.dine.dine;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -63,17 +64,25 @@ public class FoodActivity extends AppCompatActivity {
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
 
+    // inflates the menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
 
+    /**
+     * Does something when the an item in the overflow menu is touched.
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
             case R.id.action_settings:
+                Intent preferencesActivity = new Intent(this, SettingsActivity.class);
+                startActivity(preferencesActivity);
                 return true;
 
             default:

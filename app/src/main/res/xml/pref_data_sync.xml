@@ -18,4 +18,39 @@
         <intent android:action="android.settings.SYNC_SETTINGS" />
     </Preference>
 
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="example_switch"
+        android:summaryOff="@string/vegan_summary_off"
+        android:summaryOn="@string/vegan_summary"
+        android:title="Vegan" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="example_switch"
+        android:summaryOff="@string/vegetarian_summary_off"
+        android:summaryOn="@string/vegetarian_summary_on"
+        android:title="@string/vegetarian_title" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="example_switch"
+        android:summaryOff="@string/gluten_free_summary_off"
+        android:summaryOn="@string/gluten_free_summary_on"
+        android:title="@string/gluten_free_title" />
+
+    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="None"
+        android:inputType="textCapWords"
+        android:key="example_text"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Other Preferences"
+        android:summary="Enter any other dietary preferences here"/>
+
+
 </PreferenceScreen>
