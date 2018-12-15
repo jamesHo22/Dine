@@ -16,8 +16,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -63,6 +61,7 @@ public class FoodActivity extends AppCompatActivity {
     private FirestoreRecyclerAdapter mFirestoreAdapter;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
+    private android.support.v7.widget.Toolbar myToolbar;
 
     // inflates the menu
     @Override
@@ -97,7 +96,7 @@ public class FoodActivity extends AppCompatActivity {
         setUpRecyclerView();
 
         // Setup toolbar
-        android.support.v7.widget.Toolbar myToolbar = findViewById(R.id.toolbar);
+        myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
 
         // Construct a GeoDataClient.
@@ -188,7 +187,7 @@ public class FoodActivity extends AppCompatActivity {
      */
     private void getLocation() {
         // Temporary location tag
-        final TextView location_tv = findViewById(R.id.current_location);
+        //final TextView location_tv = findViewById(R.id.current_location);
 
         @SuppressLint("MissingPermission") final Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
         placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
@@ -198,13 +197,18 @@ public class FoodActivity extends AppCompatActivity {
 
                 String name = likelyPlaces.get(0).getPlace().getName().toString();
                 float probability = likelyPlaces.get(0).getLikelihood();
-                //Toast.makeText(getApplicationContext(), "You are currently at " + name + " with a " + probability + " certainty", Toast.LENGTH_LONG).show();
-                location_tv.setText("Place: " + name + "\nLikelihood: " + probability);
+                com.google.android.gms.maps.model.LatLng coordinates = likelyPlaces.get(0).getPlace().getLatLng();
+                Toast.makeText(getApplicationContext(), String.valueOf(coordinates), Toast.LENGTH_LONG).show();
+//                location_tv.setText(name);
+//                location_tv.setVisibility(View.GONE);
+                myToolbar.setTitle(name);
                 Log.d(TAG, "onComplete: ");
                 for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                    Log.i(TAG, String.format("Place '%s' has likelihood: %g",
+                    Log.i(TAG, String.format("Place '%s' has likelihood: %g coordinates: %s",
                             placeLikelihood.getPlace().getName(),
-                            placeLikelihood.getLikelihood()));
+                            placeLikelihood.getLikelihood(),
+                            String.valueOf(coordinates)
+                    ));
                 }
                 likelyPlaces.release();
             }
@@ -276,14 +280,15 @@ public class FoodActivity extends AppCompatActivity {
 
                 // Add ability to hide and show order button depending on if the user has clicked the particular item.
                 final Button orderButton = itemView.findViewById(R.id.order_dish);
-                final ImageView dropDown = itemView.findViewById(R.id.expand_card);
+                // Remove ordering icon
+                //final ImageView dropDown = itemView.findViewById(R.id.expand_card);
                 int visibility = orderButton.getVisibility();
                 if (visibility == View.GONE) {
                     orderButton.setVisibility(View.VISIBLE);
-                    dropDown.setImageResource(R.drawable.ic_arrow_drop_up_pink_24dp);
+                    //dropDown.setImageResource(R.drawable.ic_arrow_drop_up_pink_24dp);
                 } else {
                     orderButton.setVisibility(View.GONE);
-                    dropDown.setImageResource(R.drawable.ic_arrow_drop_down_circle_black_24dp);
+                    //dropDown.setImageResource(R.drawable.ic_arrow_drop_down_circle_black_24dp);
                 }
 
                 /**
@@ -295,7 +300,7 @@ public class FoodActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         moveItemToCurrentOrders(documentSnapshot);
                         orderButton.setVisibility(View.GONE);
-                        dropDown.setImageResource(R.drawable.ic_arrow_drop_down_circle_black_24dp);
+                        //dropDown.setImageResource(R.drawable.ic_arrow_drop_down_circle_black_24dp);
                         Toast.makeText(getApplicationContext(), "You ordered " + String.valueOf(documentSnapshot.get("title")), Toast.LENGTH_SHORT).show();
                     }
                 });

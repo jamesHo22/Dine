@@ -18,17 +18,18 @@
         app:titleTextColor="#FFFFFF"
     ></android.support.v7.widget.Toolbar>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:id="@+id/current_location"
-        android:fontFamily="sans-serif-light"
-        android:text="No location found\nPlease grant location permissions"
-        android:padding="8dp"
-        android:textSize="18sp"
-        android:elevation="4dp"
-        android:background="#ff779a"
-        android:textColor="#FFFFFF" />
+    <!--<TextView-->
+        <!--android:id="@+id/current_location"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:background="#FF4081"-->
+        <!--android:elevation="4dp"-->
+        <!--android:fontFamily="sans-serif-light"-->
+        <!--android:padding="8dp"-->
+        <!--android:text="No location found\nPlease grant location permissions"-->
+        <!--android:textColor="#FFFFFF"-->
+        <!--android:textSize="18sp"-->
+        <!--android:gravity="center"/>-->
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_show_menu_items"
