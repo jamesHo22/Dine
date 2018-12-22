@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="Dietary_category"
+        android:title="Dietary Preferences">
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="gluten_free_switch"
+            android:title="Gluten Free"
+            android:summaryOff="Show me everything"
+            android:summaryOn="Show me gluten free options"
+            />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="vegan_switch"
+            android:title="Vegan"
+            android:summaryOff="Show me everything"
+            android:summaryOn="Show me vegan options"
+            />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="vegetarian_switch"
+            android:title="Vegetarian"
+            android:summaryOff="Show me everything"
+            android:summaryOn="Show me vegan options"
+            />
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

@@ -3,11 +3,13 @@ package com.example.dine.dine;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -80,8 +82,11 @@ public class FoodActivity extends AppCompatActivity {
         switch (item.getItemId()) {
 
             case R.id.action_settings:
-                Intent preferencesActivity = new Intent(this, SettingsActivity.class);
-                startActivity(preferencesActivity);
+
+                // Open settings activity
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+
                 return true;
 
             default:
@@ -122,45 +127,24 @@ public class FoodActivity extends AppCompatActivity {
             Log.d(TAG, "onCreate: permission already granted");
             getLocation();
         }
-        /**
-         * Comment out FCM test code
-         */
-//        // Get Firebase token
-//        FirebaseInstanceId.getInstance().getInstanceId()
-//                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
-//                        if (!task.isSuccessful()) {
-//                            Log.w("Token", "getInstanceId failed", task.getException());
-//                            return;
-//                        }
-//                        // Get new Instance ID token
-//                        String token = task.getResult().getToken();
-//                        // Log token
-//                        Log.d("Token", token);
-//                    }
-//                });
-//
-//        // Subscribe to a test topic
-//        /**
-//         * Currently, the following FirebaseMessaging function subscribes to the topic "weather".
-//         * It logs "subcribed" if it does so and "failed to subscribe" if it doesn't.
-//         * If the topic does not exist, it will create a new topic on the firebase project
-//         * Call unsubscribeFromTopic() with the topic name to unsubscribe
-//         */
-//        FirebaseMessaging.getInstance().subscribeToTopic("weather")
-//                .addOnCompleteListener(new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        String msg = "subscribed";
-//                        if (!task.isSuccessful()) {
-//                            msg = "failed to subscribe";
-//                        }
-//                        Log.d(TAG, msg);
-//                        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-//                    }
-//                });
+    }
 
+    private void checkPreferences() {
+        // ensure settings are initialized with their default values
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+        // Read values from shared preferences
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean glutenFreeSwitchPref = sharedPref.getBoolean
+                (SettingsActivity.KEY_GLUTEN_FREE_SWITCH, false);
+        Boolean veganSwitchPref = sharedPref.getBoolean
+                (SettingsActivity.KEY_VEGAN_SWITCH, false);
+        Boolean vegetarianSwitchPref = sharedPref.getBoolean
+                (SettingsActivity.KEY_VEGETARIAN_SWITCH, false);
+        Log.d(TAG, "checkPreferences: gluten free is " + glutenFreeSwitchPref.toString() +
+                " vegan is " + veganSwitchPref.toString() +
+                "vegetarian swtich is " + vegetarianSwitchPref.toString());
     }
 
     @Override
@@ -198,7 +182,7 @@ public class FoodActivity extends AppCompatActivity {
                 String name = likelyPlaces.get(0).getPlace().getName().toString();
                 float probability = likelyPlaces.get(0).getLikelihood();
                 com.google.android.gms.maps.model.LatLng coordinates = likelyPlaces.get(0).getPlace().getLatLng();
-                Toast.makeText(getApplicationContext(), String.valueOf(coordinates), Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(), String.valueOf(coordinates), Toast.LENGTH_LONG).show();
 //                location_tv.setText(name);
 //                location_tv.setVisibility(View.GONE);
                 myToolbar.setTitle(name);
@@ -220,6 +204,8 @@ public class FoodActivity extends AppCompatActivity {
      */
     private void setUpRecyclerView() {
         // Create a query when requesting data from firestore
+        // FIXME: figure out compound orders orderBy("price", Query.Direction.DESCENDING)
+        // TODO: use preferences to determine what items to show whereArrayContains("info", "vegan");
         Query query = itemRef.orderBy("price", Query.Direction.DESCENDING);
         FirestoreRecyclerOptions<Item> options =  new FirestoreRecyclerOptions.Builder<Item>()
                 .setQuery(query, Item.class)
@@ -336,6 +322,8 @@ public class FoodActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
+        // Check for changes in shared preferences
+        checkPreferences();
         super.onStart();
         mFirestoreAdapter.startListening();
     }

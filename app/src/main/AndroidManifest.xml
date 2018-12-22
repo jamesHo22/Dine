@@ -39,10 +39,9 @@
             </intent-filter>
         </service>
 
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_preference"
-            android:theme="@style/AppTheme"></activity>
+        <activity android:name=".SettingsActivity"
+            android:theme="@style/AppTheme">
+        </activity>
     </application>
 
 </manifest>
