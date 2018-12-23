@@ -37,7 +37,9 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -60,6 +62,8 @@ public class FoodActivity extends AppCompatActivity {
     private CollectionReference itemRef = db.collection("restaurants")
             .document("aqvUJjyokpta9KyBFz9U")
             .collection("all_items");
+    //change the query when preferences are checked
+    private Query query;
     private FirestoreRecyclerAdapter mFirestoreAdapter;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
@@ -98,6 +102,8 @@ public class FoodActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food);
+        // check user preferences before loading anything
+        checkPreferences();
         setUpRecyclerView();
 
         // Setup toolbar
@@ -129,7 +135,12 @@ public class FoodActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * In check preferences,
+     */
+    //FIXME: Make a function that generates a query based on location and preferences and have it call this method and getLocation method.
     private void checkPreferences() {
+
         // ensure settings are initialized with their default values
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
@@ -142,9 +153,71 @@ public class FoodActivity extends AppCompatActivity {
                 (SettingsActivity.KEY_VEGAN_SWITCH, false);
         Boolean vegetarianSwitchPref = sharedPref.getBoolean
                 (SettingsActivity.KEY_VEGETARIAN_SWITCH, false);
-        Log.d(TAG, "checkPreferences: gluten free is " + glutenFreeSwitchPref.toString() +
-                " vegan is " + veganSwitchPref.toString() +
-                "vegetarian swtich is " + vegetarianSwitchPref.toString());
+
+        // Make a arraylist
+        List<Boolean> preferences = new ArrayList<>();
+        preferences.add(glutenFreeSwitchPref);
+        preferences.add(veganSwitchPref);
+        preferences.add(vegetarianSwitchPref);
+
+        query = buildQuery(itemRef, preferences);
+    }
+
+    /**
+     * this builds a query that satisfies the user preferences
+     * @param itemRef is the initial path to the collection
+     * @param preferences is a List of booleans that represent the user set preferences
+     * @return a Query object that is used to call Firestore.
+     */
+    public Query buildQuery(Query itemRef, List<Boolean> preferences) {
+        boolean first_count = true;
+        boolean gluten_free_count = true;
+        boolean vegan_count = true;
+        boolean vegetarian_count = true;
+
+        Query newQuery = null;
+
+        for (int i = 0; i <= 3; i ++) {
+            Log.d(TAG, "buildQuery: " + String.valueOf(i));
+
+            if (first_count) {
+                // will only run once by setting count to false
+                first_count = false;
+                // sets newQuery with "where" clause if it is gluten free. Begin with default itemRef
+                newQuery = itemRef;
+                Log.d(TAG, "buildQuery: count is " + String.valueOf(first_count));
+
+            } else if (gluten_free_count && preferences.get(0)) {
+                gluten_free_count = false;
+                newQuery = newQuery.whereEqualTo("gluten_free", true);
+                Log.d(TAG, "buildQuery: count is (else)" + String.valueOf(gluten_free_count));
+
+            } else if (vegan_count && preferences.get(1)) {
+                vegan_count = false;
+                newQuery = newQuery.whereEqualTo("vegan", true);
+                Log.d(TAG, "buildQuery: count is (else)" + String.valueOf(vegan_count));
+
+            } else if (vegetarian_count && preferences.get(2)) {
+                vegetarian_count = false;
+                newQuery = newQuery.whereEqualTo("vegetarian", true);
+                Log.d(TAG, "buildQuery: count is (else)" + String.valueOf(vegetarian_count));
+            } else if (areAllFalse(preferences)) {
+                newQuery = itemRef;
+            }
+        }
+
+        return newQuery;
+    }
+
+    /**
+     * Checks if all of the values in the List are false
+     * @param array
+     * @return boolean value. True if all are false
+     */
+    private static boolean areAllFalse(List<Boolean> array)
+    {
+        for(boolean b : array) if(b) return false;
+        return true;
     }
 
     @Override
@@ -206,7 +279,6 @@ public class FoodActivity extends AppCompatActivity {
         // Create a query when requesting data from firestore
         // FIXME: figure out compound orders orderBy("price", Query.Direction.DESCENDING)
         // TODO: use preferences to determine what items to show whereArrayContains("info", "vegan");
-        Query query = itemRef.orderBy("price", Query.Direction.DESCENDING);
         FirestoreRecyclerOptions<Item> options =  new FirestoreRecyclerOptions.Builder<Item>()
                 .setQuery(query, Item.class)
                 .build();
@@ -322,9 +394,11 @@ public class FoodActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        // Check for changes in shared preferences
-        checkPreferences();
         super.onStart();
+        // Check for changes in shared preferences
+        // FIXME: only check preference if they changed
+        checkPreferences();
+        setUpRecyclerView();
         mFirestoreAdapter.startListening();
     }
 
