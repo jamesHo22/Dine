@@ -23,13 +23,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+                <ImageView
+                    android:id="@+id/main_image_view"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:scaleType="centerCrop"
+                    android:layout_margin="4dp"
+                    android:src="@mipmap/big_mac" />
+
                 <LinearLayout
                     android:id="@+id/text_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_alignParentStart="true"
-                    android:layout_toStartOf="@+id/main_image_view">
+                    android:layout_alignParentEnd="true"
+                    android:layout_toEndOf="@+id/main_image_view">
 
                     <TextView
                         android:id="@+id/info_text"
@@ -53,7 +63,8 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/price"
                         android:text="5.00"
-                        android:layout_margin="8dp" />
+                        android:layout_margin="8dp"
+                        android:layout_gravity="start"/>
 
 
                     <!--<RelativeLayout-->
@@ -72,16 +83,6 @@
                     <!--</RelativeLayout>-->
 
                 </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/main_image_view"
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:scaleType="centerCrop"
-                    android:layout_margin="4dp"
-                    android:src="@mipmap/big_mac" />
 
             </RelativeLayout>
 

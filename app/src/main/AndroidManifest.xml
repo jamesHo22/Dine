@@ -39,9 +39,11 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".SettingsActivity"
-            android:theme="@style/AppTheme">
-        </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:theme="@style/AppTheme"></activity>
+        <activity android:name=".ItemDetailsActivity"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

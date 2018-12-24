@@ -2,6 +2,7 @@ package com.example.dine.dine;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -17,7 +18,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -53,6 +53,7 @@ public class FoodActivity extends AppCompatActivity {
     // TODO(4, postponed): check for google play services in onCreate and onResume (https://firebase.google.com/docs/cloud-messaging/android/client#sample-play)
     // TODO(5, postponed): Make a class that handles the firebase tokens. Sending to server/when they reset.
     // TODO(6, postponed): Make a way for the client to subscribe to the firebase topic.
+    // TODO (7): Show a screen that tells user the if restaurant does not have anything they can eat
     // FIXME: Make sure to follow the permissions best practices
 
     private String TAG = this.getClass().getName();
@@ -160,6 +161,7 @@ public class FoodActivity extends AppCompatActivity {
         preferences.add(veganSwitchPref);
         preferences.add(vegetarianSwitchPref);
 
+        // Make query that satisfies user preferences.
         query = buildQuery(itemRef, preferences);
     }
 
@@ -190,17 +192,17 @@ public class FoodActivity extends AppCompatActivity {
             } else if (gluten_free_count && preferences.get(0)) {
                 gluten_free_count = false;
                 newQuery = newQuery.whereEqualTo("gluten_free", true);
-                Log.d(TAG, "buildQuery: count is (else)" + String.valueOf(gluten_free_count));
+                Log.d(TAG, "buildQuery: gluten_count is " + String.valueOf(gluten_free_count));
 
             } else if (vegan_count && preferences.get(1)) {
                 vegan_count = false;
                 newQuery = newQuery.whereEqualTo("vegan", true);
-                Log.d(TAG, "buildQuery: count is (else)" + String.valueOf(vegan_count));
+                Log.d(TAG, "buildQuery: vegan_count is " + String.valueOf(vegan_count));
 
             } else if (vegetarian_count && preferences.get(2)) {
                 vegetarian_count = false;
                 newQuery = newQuery.whereEqualTo("vegetarian", true);
-                Log.d(TAG, "buildQuery: count is (else)" + String.valueOf(vegetarian_count));
+                Log.d(TAG, "buildQuery: vegetarian_count is " + String.valueOf(vegetarian_count));
             } else if (areAllFalse(preferences)) {
                 newQuery = itemRef;
             }
@@ -336,32 +338,36 @@ public class FoodActivity extends AppCompatActivity {
                 String id = documentSnapshot.getId();
                 //Toast.makeText(FoodActivity.this, "Position " + String.valueOf(position) + " ID: " + id, Toast.LENGTH_LONG).show();
 
-                // Add ability to hide and show order button depending on if the user has clicked the particular item.
-                final Button orderButton = itemView.findViewById(R.id.order_dish);
-                // Remove ordering icon
-                //final ImageView dropDown = itemView.findViewById(R.id.expand_card);
-                int visibility = orderButton.getVisibility();
-                if (visibility == View.GONE) {
-                    orderButton.setVisibility(View.VISIBLE);
-                    //dropDown.setImageResource(R.drawable.ic_arrow_drop_up_pink_24dp);
-                } else {
-                    orderButton.setVisibility(View.GONE);
-                    //dropDown.setImageResource(R.drawable.ic_arrow_drop_down_circle_black_24dp);
-                }
+//                // Add ability to hide and show order button depending on if the user has clicked the particular item.
+//                final Button orderButton = itemView.findViewById(R.id.order_dish);
+//                // Remove ordering icon
+//                //final ImageView dropDown = itemView.findViewById(R.id.expand_card);
+//                int visibility = orderButton.getVisibility();
+//                if (visibility == View.GONE) {
+//                    orderButton.setVisibility(View.VISIBLE);
+//                    //dropDown.setImageResource(R.drawable.ic_arrow_drop_up_pink_24dp);
+//                } else {
+//                    orderButton.setVisibility(View.GONE);
+//                    //dropDown.setImageResource(R.drawable.ic_arrow_drop_down_circle_black_24dp);
+//                }
 
                 /**
                  * When the button is clicked, call the function to move the data that was clicked on to the "current_orders" part of the
                  * database.
                  */
-                orderButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        moveItemToCurrentOrders(documentSnapshot);
-                        orderButton.setVisibility(View.GONE);
-                        //dropDown.setImageResource(R.drawable.ic_arrow_drop_down_circle_black_24dp);
-                        Toast.makeText(getApplicationContext(), "You ordered " + String.valueOf(documentSnapshot.get("title")), Toast.LENGTH_SHORT).show();
-                    }
-                });
+//                orderButton.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        moveItemToCurrentOrders(documentSnapshot, getApplicationContext());
+//                        orderButton.setVisibility(View.GONE);
+//                        //dropDown.setImageResource(R.drawable.ic_arrow_drop_down_circle_black_24dp);
+//                    }
+//                });
+
+                //Make a new intent and pass this document ID into it as a string Extra
+                Intent detailIntent = new Intent(getApplicationContext(), ItemDetailsActivity.class);
+                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_DOCUMENT_ID, documentSnapshot.getId());
+                startActivity(detailIntent);
 
             }
         });
@@ -374,8 +380,9 @@ public class FoodActivity extends AppCompatActivity {
      * FIXME: instead of using Firestore RTDB, learn how to use FCM.
      * @param documentSnapshot is the Firestore document snapshot passed from the order.
      */
-    private void moveItemToCurrentOrders(DocumentSnapshot documentSnapshot) {
+    public void moveItemToCurrentOrders(DocumentSnapshot documentSnapshot, Context context) {
 
+        Toast.makeText(context, "You ordered " + String.valueOf(documentSnapshot.get("title")), Toast.LENGTH_SHORT).show();
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         String orderer = currentUser.getDisplayName();
