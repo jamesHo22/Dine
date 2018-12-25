@@ -17,6 +17,7 @@ import com.example.dine.dine.RoomDb.AppDatabase;
 import com.example.dine.dine.RoomDb.ItemEntry;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -37,6 +38,8 @@ public class ItemDetailsActivity extends AppCompatActivity {
     private String mDescription;
     private String mImageUri;
     private float mPrice;
+    private DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     // get instance of firestore
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -86,9 +89,10 @@ public class ItemDetailsActivity extends AppCompatActivity {
                     floatingActionButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            FoodActivity foodActivity = new FoodActivity();
-                            foodActivity.moveItemToCurrentOrders(document, getApplicationContext());
-                            // Testing out the database inserting
+
+                            // Sends the order to the current orders collection
+                            dataHandlingUtils.moveItemToCurrentOrders(mAuth, db, document, getApplicationContext());
+                            // Insert document ID into local database
                             ItemEntry itemEntry = new ItemEntry(document_id);
                             mDb.ItemDao().insertItem(itemEntry);
                             finish();

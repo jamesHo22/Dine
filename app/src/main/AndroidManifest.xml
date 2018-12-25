@@ -41,8 +41,11 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:theme="@style/AppTheme"></activity>
-        <activity android:name=".ItemDetailsActivity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ItemDetailsActivity"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".OrderSummaryActivity"
             android:theme="@style/AppTheme"></activity>
     </application>
 

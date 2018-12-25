@@ -4,9 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,7 +12,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -38,17 +35,10 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 
 public class FoodActivity extends AppCompatActivity {
@@ -71,13 +61,11 @@ public class FoodActivity extends AppCompatActivity {
     private CollectionReference itemRef = db.collection("restaurants")
             .document("aqvUJjyokpta9KyBFz9U")
             .collection("all_items");
-    //change the query when preferences are checked
-    private Query query;
     private FirestoreRecyclerAdapter mFirestoreAdapter;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
     private android.support.v7.widget.Toolbar myToolbar;
-    private AppDatabase mDb;
+    private AppDatabase roomDb;
 
     // inflates the menu
     @Override
@@ -113,7 +101,7 @@ public class FoodActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food);
         // check user preferences before loading anything
-        checkPreferences();
+        DataHandlingUtils.makePrefQuery(this, itemRef);
         setUpRecyclerView();
 
         // Setup toolbar
@@ -131,7 +119,9 @@ public class FoodActivity extends AppCompatActivity {
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setupViewModel();
+                //setupViewModel();
+                Intent intent = new Intent(getApplicationContext(), OrderSummaryActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -154,9 +144,12 @@ public class FoodActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Accesses the roomDatabase through a viewModel. Only observes one item.
+     */
     private void setupViewModel() {
-        mDb = AppDatabase.getInstance(this);
-        AddItemViewModelFactory factory = new AddItemViewModelFactory(mDb, 1);
+        roomDb = AppDatabase.getInstance(this);
+        AddItemViewModelFactory factory = new AddItemViewModelFactory(roomDb, 1);
 
         AddItemViewModel viewModel = ViewModelProviders.of(this, factory).get(AddItemViewModel.class);
         viewModel.getItem().observe(this, new Observer<ItemEntry>() {
@@ -171,92 +164,6 @@ public class FoodActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    /**
-     * In check preferences,
-     */
-    //FIXME: Make a function that generates a query based on location and preferences and have it call this method and getLocation method.
-    private void checkPreferences() {
-
-        // ensure settings are initialized with their default values
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
-        // Read values from shared preferences
-        SharedPreferences sharedPref =
-                PreferenceManager.getDefaultSharedPreferences(this);
-        Boolean glutenFreeSwitchPref = sharedPref.getBoolean
-                (SettingsActivity.KEY_GLUTEN_FREE_SWITCH, false);
-        Boolean veganSwitchPref = sharedPref.getBoolean
-                (SettingsActivity.KEY_VEGAN_SWITCH, false);
-        Boolean vegetarianSwitchPref = sharedPref.getBoolean
-                (SettingsActivity.KEY_VEGETARIAN_SWITCH, false);
-
-        // Make a arraylist
-        List<Boolean> preferences = new ArrayList<>();
-        preferences.add(glutenFreeSwitchPref);
-        preferences.add(veganSwitchPref);
-        preferences.add(vegetarianSwitchPref);
-
-        // Make query that satisfies user preferences.
-        query = buildQuery(itemRef, preferences);
-    }
-
-    /**
-     * this builds a query that satisfies the user preferences
-     * @param itemRef is the initial path to the collection
-     * @param preferences is a List of booleans that represent the user set preferences
-     * @return a Query object that is used to call Firestore.
-     */
-    public Query buildQuery(Query itemRef, List<Boolean> preferences) {
-        boolean first_count = true;
-        boolean gluten_free_count = true;
-        boolean vegan_count = true;
-        boolean vegetarian_count = true;
-
-        Query newQuery = null;
-
-        for (int i = 0; i <= 3; i ++) {
-            Log.d(TAG, "buildQuery: " + String.valueOf(i));
-
-            if (first_count) {
-                // will only run once by setting count to false
-                first_count = false;
-                // sets newQuery with "where" clause if it is gluten free. Begin with default itemRef
-                newQuery = itemRef;
-                Log.d(TAG, "buildQuery: count is " + String.valueOf(first_count));
-
-            } else if (gluten_free_count && preferences.get(0)) {
-                gluten_free_count = false;
-                newQuery = newQuery.whereEqualTo("gluten_free", true);
-                Log.d(TAG, "buildQuery: gluten_count is " + String.valueOf(gluten_free_count));
-
-            } else if (vegan_count && preferences.get(1)) {
-                vegan_count = false;
-                newQuery = newQuery.whereEqualTo("vegan", true);
-                Log.d(TAG, "buildQuery: vegan_count is " + String.valueOf(vegan_count));
-
-            } else if (vegetarian_count && preferences.get(2)) {
-                vegetarian_count = false;
-                newQuery = newQuery.whereEqualTo("vegetarian", true);
-                Log.d(TAG, "buildQuery: vegetarian_count is " + String.valueOf(vegetarian_count));
-            } else if (areAllFalse(preferences)) {
-                newQuery = itemRef;
-            }
-        }
-
-        return newQuery;
-    }
-
-    /**
-     * Checks if all of the values in the List are false
-     * @param array
-     * @return boolean value. True if all are false
-     */
-    private static boolean areAllFalse(List<Boolean> array)
-    {
-        for(boolean b : array) if(b) return false;
-        return true;
     }
 
     @Override
@@ -316,8 +223,7 @@ public class FoodActivity extends AppCompatActivity {
      */
     private void setUpRecyclerView() {
         // Create a query when requesting data from firestore
-        // FIXME: figure out compound orders orderBy("price", Query.Direction.DESCENDING)
-        // TODO: use preferences to determine what items to show whereArrayContains("info", "vegan");
+        Query query = DataHandlingUtils.makePrefQuery(this, itemRef);
         FirestoreRecyclerOptions<Item> options =  new FirestoreRecyclerOptions.Builder<Item>()
                 .setQuery(query, Item.class)
                 .build();
@@ -362,7 +268,6 @@ public class FoodActivity extends AppCompatActivity {
             }
         }).attachToRecyclerView(recyclerView);
 
-
         /**
          * The onItemClick function does something when it is clicked. It is an interface from FirestoreItemAdapter.onItemClickListener()
          * that must be overridden.
@@ -371,35 +276,6 @@ public class FoodActivity extends AppCompatActivity {
         ((FirestoreItemAdapter) mFirestoreAdapter).setOnItemClickListener(new FirestoreItemAdapter.onItemClickListener() {
             @Override
             public void onItemClick(final DocumentSnapshot documentSnapshot, int position, View itemView) {
-                // TODO: watch firestore tutorials to see what you can do with document snapshots
-                String id = documentSnapshot.getId();
-                //Toast.makeText(FoodActivity.this, "Position " + String.valueOf(position) + " ID: " + id, Toast.LENGTH_LONG).show();
-
-//                // Add ability to hide and show order button depending on if the user has clicked the particular item.
-//                final Button orderButton = itemView.findViewById(R.id.order_dish);
-//                // Remove ordering icon
-//                //final ImageView dropDown = itemView.findViewById(R.id.expand_card);
-//                int visibility = orderButton.getVisibility();
-//                if (visibility == View.GONE) {
-//                    orderButton.setVisibility(View.VISIBLE);
-//                    //dropDown.setImageResource(R.drawable.ic_arrow_drop_up_pink_24dp);
-//                } else {
-//                    orderButton.setVisibility(View.GONE);
-//                    //dropDown.setImageResource(R.drawable.ic_arrow_drop_down_circle_black_24dp);
-//                }
-
-                /**
-                 * When the button is clicked, call the function to move the data that was clicked on to the "current_orders" part of the
-                 * database.
-                 */
-//                orderButton.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        moveItemToCurrentOrders(documentSnapshot, getApplicationContext());
-//                        orderButton.setVisibility(View.GONE);
-//                        //dropDown.setImageResource(R.drawable.ic_arrow_drop_down_circle_black_24dp);
-//                    }
-//                });
 
                 //Make a new intent and pass this document ID into it as a string Extra
                 Intent detailIntent = new Intent(getApplicationContext(), ItemDetailsActivity.class);
@@ -410,38 +286,12 @@ public class FoodActivity extends AppCompatActivity {
         });
     }
 
-
-    /**
-     * Makes a copy of the menu items that was clicked. Attaches timestamp and name of person who ordered it.
-     * Sets this new HashMap to the "current_orders" path.
-     * FIXME: instead of using Firestore RTDB, learn how to use FCM.
-     * @param documentSnapshot is the Firestore document snapshot passed from the order.
-     */
-    public void moveItemToCurrentOrders(DocumentSnapshot documentSnapshot, Context context) {
-
-        Toast.makeText(context, "You ordered " + String.valueOf(documentSnapshot.get("title")), Toast.LENGTH_SHORT).show();
-        mAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        String orderer = currentUser.getDisplayName();
-
-        Map<String, Object> orderInfo = new HashMap<>();
-        orderInfo.put("ordered_by", orderer);
-        orderInfo.put("order_time", FieldValue.serverTimestamp());
-        // Combine documentSnapshot and orderInfo Maps
-        orderInfo.putAll(documentSnapshot.getData());
-
-        db.collection("restaurants")
-                .document("aqvUJjyokpta9KyBFz9U")
-                .collection("current_orders").document()
-                .set(orderInfo);
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
         // Check for changes in shared preferences
         // FIXME: only check preference if they changed
-        checkPreferences();
+        DataHandlingUtils.makePrefQuery(this, itemRef);
         setUpRecyclerView();
         mFirestoreAdapter.startListening();
     }
