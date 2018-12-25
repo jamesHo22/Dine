@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.dine.dine.RoomDb.AppDatabase;
+import com.example.dine.dine.RoomDb.ItemEntry;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
@@ -59,6 +61,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
         final CollapsingToolbarLayout detailed_toolbar = findViewById(R.id.collapsingToolbarLayout);
         final ImageView detailed_iv = findViewById(R.id.detailed_iv);
         final FloatingActionButton floatingActionButton = findViewById(R.id.fab_detailed);
+        final AppDatabase mDb = AppDatabase.getInstance(this);
 
         // Store item information in variables
         // Get the document, forcing the SDK to use the offline cache
@@ -85,6 +88,9 @@ public class ItemDetailsActivity extends AppCompatActivity {
                         public void onClick(View v) {
                             FoodActivity foodActivity = new FoodActivity();
                             foodActivity.moveItemToCurrentOrders(document, getApplicationContext());
+                            // Testing out the database inserting
+                            ItemEntry itemEntry = new ItemEntry(document_id);
+                            mDb.ItemDao().insertItem(itemEntry);
                             finish();
                         }
                     });

@@ -2,12 +2,16 @@ package com.example.dine.dine;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
@@ -20,6 +24,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.dine.dine.RoomDb.AddItemViewModel;
+import com.example.dine.dine.RoomDb.AddItemViewModelFactory;
+import com.example.dine.dine.RoomDb.AppDatabase;
+import com.example.dine.dine.RoomDb.ItemEntry;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.location.places.GeoDataClient;
@@ -69,6 +77,7 @@ public class FoodActivity extends AppCompatActivity {
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
     private android.support.v7.widget.Toolbar myToolbar;
+    private AppDatabase mDb;
 
     // inflates the menu
     @Override
@@ -117,6 +126,15 @@ public class FoodActivity extends AppCompatActivity {
         // Construct a PlaceDetectionClient.
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
 
+        FloatingActionButton mFloatingActionButton;
+        mFloatingActionButton = findViewById(R.id.fab);
+        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setupViewModel();
+            }
+        });
+
         // Check for or request for permissions
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
@@ -134,6 +152,25 @@ public class FoodActivity extends AppCompatActivity {
             Log.d(TAG, "onCreate: permission already granted");
             getLocation();
         }
+    }
+
+    private void setupViewModel() {
+        mDb = AppDatabase.getInstance(this);
+        AddItemViewModelFactory factory = new AddItemViewModelFactory(mDb, 1);
+
+        AddItemViewModel viewModel = ViewModelProviders.of(this, factory).get(AddItemViewModel.class);
+        viewModel.getItem().observe(this, new Observer<ItemEntry>() {
+            @Override
+            public void onChanged(@Nullable ItemEntry itemEntry) {
+                try {
+                    String message = itemEntry.getItemId();
+                    Log.d(TAG, "onClick: Updating live from ViewModel " + message);
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, "onClick: nothing in the database");
+                }
+            }
+        });
     }
 
     /**
