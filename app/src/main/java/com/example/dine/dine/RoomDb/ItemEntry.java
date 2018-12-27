@@ -15,22 +15,36 @@ public class ItemEntry {
     @PrimaryKey(autoGenerate = true)
     public int id;
     public String item_id;
+    public String title;
+    public String description;
+    public int price;
 
     @Ignore
-    public ItemEntry(String item_id) {
+    public ItemEntry(String item_id, String title, String description, int price) {
         this.item_id = item_id;
+        this.title = title;
+        this.description = description;
+        this.price = price;
     }
 
-    public ItemEntry(int id, String item_id) {
+    public ItemEntry(int id, String item_id, String title, String description, int price) {
         this.id = id;
         this.item_id = item_id;
+        this.title = title;
+        this.description = description;
+        this.price = price;
     }
     public int getId() {
-        return id;
+        return this.id;
     }
 
     public String getItemId() {
         return this.item_id;
     }
 
+    public String getTitle() { return this.title; }
+
+    public String getDescription() { return this.description; }
+
+    public int getPrice() { return this.price; }
 }

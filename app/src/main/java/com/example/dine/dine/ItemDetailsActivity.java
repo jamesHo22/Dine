@@ -57,6 +57,9 @@ public class ItemDetailsActivity extends AppCompatActivity {
         //Receive firestore doc id from the card that launched this activity.
         Intent launchIntent = getIntent();
         final String document_id = launchIntent.getStringExtra(INTENT_EXTRA_DOCUMENT_ID);
+        final String title = launchIntent.getStringExtra(INTENT_EXTRA_KEY_DETAILED_TITLE);
+        final String description = launchIntent.getStringExtra(INTENT_EXTRA_KEY_DETAILED_DESCRIPTION);
+        final int price = launchIntent.getIntExtra(INTENT_EXTRA_KEY_DETAILED_PRICE, 1234);
         Log.d(TAG, "onCreate: " + document_id);
 
         //Find the views.
@@ -93,7 +96,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
                             // Sends the order to the current orders collection
                             dataHandlingUtils.moveItemToCurrentOrders(mAuth, db, document, getApplicationContext());
                             // Insert document ID into local database
-                            ItemEntry itemEntry = new ItemEntry(document_id);
+                            ItemEntry itemEntry = new ItemEntry(document_id, title, description, price);
                             mDb.ItemDao().insertItem(itemEntry);
                             finish();
                         }

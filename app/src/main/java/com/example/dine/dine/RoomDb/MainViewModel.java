@@ -18,6 +18,7 @@ public class MainViewModel extends AndroidViewModel {
     private static final String TAG = MainViewModel.class.getSimpleName();
 
     private LiveData<List<ItemEntry>> items;
+    private AppDatabase mDb = AppDatabase.getInstance(this.getApplication());
 
     /**
      * Cache LiveData objects
@@ -25,12 +26,15 @@ public class MainViewModel extends AndroidViewModel {
      */
     public MainViewModel(@NonNull Application application) {
         super(application);
-        AppDatabase mDb = AppDatabase.getInstance(this.getApplication());
         Log.d(TAG, "MainViewModel: Actively retrieving from the Database");
         items = mDb.ItemDao().loadAllItems();
     }
 
     public LiveData<List<ItemEntry>> getItems() {
         return items;
+    }
+
+    public void deleteItem(ItemEntry itemEntry) {
+        mDb.ItemDao().deleteItem(itemEntry);
     }
 }

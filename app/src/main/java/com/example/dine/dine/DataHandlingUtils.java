@@ -143,8 +143,4 @@ public class DataHandlingUtils {
         Query mQuery = buildQuery(itemRef, preferences);
         return mQuery;
     }
-
-//    public static ArrayList<String> getOrderList() {
-//
-//    }
 }

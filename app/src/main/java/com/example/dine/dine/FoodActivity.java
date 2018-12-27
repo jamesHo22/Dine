@@ -25,6 +25,7 @@ import com.example.dine.dine.RoomDb.AddItemViewModel;
 import com.example.dine.dine.RoomDb.AddItemViewModelFactory;
 import com.example.dine.dine.RoomDb.AppDatabase;
 import com.example.dine.dine.RoomDb.ItemEntry;
+import com.example.dine.dine.uiDrawers.FirestoreItemAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.location.places.GeoDataClient;
@@ -227,7 +228,7 @@ public class FoodActivity extends AppCompatActivity {
         FirestoreRecyclerOptions<Item> options =  new FirestoreRecyclerOptions.Builder<Item>()
                 .setQuery(query, Item.class)
                 .build();
-        mFirestoreAdapter = new FirestoreItemAdapter(options);
+        mFirestoreAdapter = new FirestoreItemAdapter(options, FirestoreItemAdapter.MENU_ORDERING_STYLE);
         RecyclerView recyclerView = findViewById(R.id.rv_show_menu_items);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -277,11 +278,19 @@ public class FoodActivity extends AppCompatActivity {
             @Override
             public void onItemClick(final DocumentSnapshot documentSnapshot, int position, View itemView) {
 
+                // Get values of objects in document snapshot
+                String document_id = documentSnapshot.getId();
+                String title = documentSnapshot.get("title").toString();
+                String description = documentSnapshot.get("description").toString();
+                int price = Integer.valueOf(documentSnapshot.get("price").toString());
+
                 //Make a new intent and pass this document ID into it as a string Extra
                 Intent detailIntent = new Intent(getApplicationContext(), ItemDetailsActivity.class);
-                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_DOCUMENT_ID, documentSnapshot.getId());
+                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_DOCUMENT_ID, document_id);
+                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_KEY_DETAILED_TITLE, title);
+                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_KEY_DETAILED_DESCRIPTION, description);
+                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_KEY_DETAILED_PRICE, price);
                 startActivity(detailIntent);
-
             }
         });
     }
