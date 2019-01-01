@@ -33,8 +33,4 @@ public class MainViewModel extends AndroidViewModel {
     public LiveData<List<ItemEntry>> getItems() {
         return items;
     }
-
-    public void deleteItem(ItemEntry itemEntry) {
-        mDb.ItemDao().deleteItem(itemEntry);
-    }
 }

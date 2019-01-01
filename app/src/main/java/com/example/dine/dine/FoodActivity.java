@@ -202,9 +202,6 @@ public class FoodActivity extends AppCompatActivity {
                 String name = likelyPlaces.get(0).getPlace().getName().toString();
                 float probability = likelyPlaces.get(0).getLikelihood();
                 com.google.android.gms.maps.model.LatLng coordinates = likelyPlaces.get(0).getPlace().getLatLng();
-                //Toast.makeText(getApplicationContext(), String.valueOf(coordinates), Toast.LENGTH_LONG).show();
-//                location_tv.setText(name);
-//                location_tv.setVisibility(View.GONE);
                 myToolbar.setTitle(name);
                 Log.d(TAG, "onComplete: ");
                 for (PlaceLikelihood placeLikelihood : likelyPlaces) {

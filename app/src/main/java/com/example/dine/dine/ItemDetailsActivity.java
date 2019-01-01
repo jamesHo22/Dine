@@ -84,7 +84,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
                     detailed_description_tv.setText(document.get("description").toString());
                     detailed_toolbar.setTitle(document.get("title").toString());
                     // Get context for picasso
-                    Context context = getApplicationContext();
+                    final Context context = getApplicationContext();
                     Uri imageUri = Uri.parse(document.get("imageUri").toString());
                     // Loads the image URI from that document into the imageView.
                     Picasso.with(context).load(imageUri).fit().centerCrop().into(detailed_iv);
@@ -94,10 +94,10 @@ public class ItemDetailsActivity extends AppCompatActivity {
                         public void onClick(View v) {
 
                             // Sends the order to the current orders collection
-                            dataHandlingUtils.moveItemToCurrentOrders(mAuth, db, document, getApplicationContext());
+                            dataHandlingUtils.orderOneItem(mAuth, db, document, getApplicationContext());
                             // Insert document ID into local database
                             ItemEntry itemEntry = new ItemEntry(document_id, title, description, price);
-                            mDb.ItemDao().insertItem(itemEntry);
+                            dataHandlingUtils.insertItemRoom(itemEntry, context);
                             finish();
                         }
                     });

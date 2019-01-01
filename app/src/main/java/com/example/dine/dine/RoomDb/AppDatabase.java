@@ -29,7 +29,6 @@ public abstract class AppDatabase extends RoomDatabase {
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
                         AppDatabase.class, AppDatabase.DATABASE_NAME)
                         //Move all database operations to background thread.
-                        .allowMainThreadQueries()
                         //FIXME: Disable main thread queries once everything works
                         .build();
             }

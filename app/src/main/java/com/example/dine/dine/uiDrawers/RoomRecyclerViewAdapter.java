@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.example.dine.dine.R;
 import com.example.dine.dine.RoomDb.ItemEntry;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import static android.support.constraint.Constraints.TAG;
@@ -53,8 +54,9 @@ public class RoomRecyclerViewAdapter extends RecyclerView.Adapter<RoomRecyclerVi
         float price = (float)item.getPrice()/100;
         Log.d(TAG, "onBindViewHolder: " + price);
         holder.orderSummaryTitleTv.setText(item.getTitle());
-        //holder.orderSummaryDescriptionTv.setText(item.getDescription());
-        holder.orderSummaryPriceTv.setText("$ " + String.valueOf(price));
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        holder.orderSummaryPriceTv.setText("$" + String.valueOf(df.format(price)));
     }
 
     @Override

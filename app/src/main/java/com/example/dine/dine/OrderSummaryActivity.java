@@ -4,7 +4,6 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,13 +11,14 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.dine.dine.RoomDb.ItemEntry;
 import com.example.dine.dine.RoomDb.MainViewModel;
 import com.example.dine.dine.uiDrawers.RoomRecyclerViewAdapter;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,17 +35,21 @@ public class OrderSummaryActivity extends AppCompatActivity {
     private RoomRecyclerViewAdapter mAdapter;
     private MainViewModel mMainViewModel;
     private Toolbar mToolbar;
-    private LinearLayout mBottomSheet;
-    private float sum = 0;
     private TextView mSumTv;
+    private DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
+    private TextView mPlaceOrderButton;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_summary);
+        mMainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         setUpRecyclerView();
         mToolbar = findViewById(R.id.order_summary_toolbar);
-        mToolbar.setTitle("Order Summary");
+        mPlaceOrderButton = findViewById(R.id.place_order);
+        mToolbar.setTitle("Your Order");
         mToolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp));
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,20 +59,35 @@ public class OrderSummaryActivity extends AppCompatActivity {
             }
         });
 
-        //Setup bottom sheet
-        mBottomSheet = findViewById(R.id.bottom_sheet);
-        final BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
-        mBottomSheet.setOnClickListener(new View.OnClickListener() {
+        mPlaceOrderButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int sheetState = bottomSheetBehavior.getState();
-                if (sheetState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                } else {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                orderItems();
+            }
+        });
+
+
+    }
+
+    /**
+     * Orders the items in the cart
+     */
+    private void orderItems() {
+        final ArrayList<String> item_ids = new ArrayList<>();
+        mMainViewModel.getItems().observe(this, new Observer<List<ItemEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<ItemEntry> itemEntries) {
+                item_ids.clear();
+                for(int i = 0; i < itemEntries.size(); i++) {
+                    item_ids.add(itemEntries.get(i).getItemId());
+                    Log.d(TAG, "onChanged: " + item_ids.get(i));
                 }
             }
         });
+
+        dataHandlingUtils.orderItems(mAuth, db, this, item_ids);
+        dataHandlingUtils.deleteAllItemsRoom(this);
+        finish();
     }
 
     /**
@@ -84,7 +103,6 @@ public class OrderSummaryActivity extends AppCompatActivity {
         mSumTv = findViewById(R.id.total_price);
         Log.d(TAG, "setUpRecyclerView: setup recycler view" );
 
-        mMainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         mMainViewModel.getItems().observe(this, new Observer<List<ItemEntry>>() {
             @Override
             public void onChanged(@Nullable List<ItemEntry> itemEntries) {
@@ -94,10 +112,11 @@ public class OrderSummaryActivity extends AppCompatActivity {
 
                 // Get sum of price
                 //FIXME: probably put this in another method
+                float sum = 0;
                 for(int i = 0; i<itemEntries.size(); i++) {
                     sum += (float) itemEntries.get(i).getPrice();
                     Log.d(TAG, "onChanged: sum of items " + sum);
-                    mSumTv.setText("$ " + String.valueOf(sum/100));
+                    mSumTv.setText("$" + String.format("%.02f", sum/100));
                 }
             }
         });
@@ -133,7 +152,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
 
                     int adapterPosition = viewHolder.getAdapterPosition();
                     mItemEntries = mAdapter.getItemEntries();
-                    mMainViewModel.deleteItem(mItemEntries.get(adapterPosition));
+                    dataHandlingUtils.deleteItemRoom(mItemEntries.get(adapterPosition), getApplicationContext());
                 } else {
                     mDirection = "left";
                     // Do not delete the item.

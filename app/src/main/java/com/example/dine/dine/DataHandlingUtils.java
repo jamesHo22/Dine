@@ -2,11 +2,16 @@ package com.example.dine.dine;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.example.dine.dine.RoomDb.AppDatabase;
+import com.example.dine.dine.RoomDb.ItemEntry;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -16,6 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +33,8 @@ public class DataHandlingUtils {
 
     private final static String TAG = DataHandlingUtils.class.getSimpleName();
     private AppDatabase roomDb;
-    public static void DataHandlingUtils() {
 
+    public static void DataHandlingUtils() {
     }
 
     /**
@@ -96,7 +102,7 @@ public class DataHandlingUtils {
      * @param documentSnapshot is the Firestore document snapshot passed from the order.
      * @param context is the context of the activity.
      */
-    public void moveItemToCurrentOrders(FirebaseAuth mAuth, FirebaseFirestore db, DocumentSnapshot documentSnapshot, Context context) {
+    public void orderOneItem(FirebaseAuth mAuth, FirebaseFirestore db, DocumentSnapshot documentSnapshot, Context context) {
 
         Toast.makeText(context, "You ordered " + String.valueOf(documentSnapshot.get("title")), Toast.LENGTH_SHORT).show();
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -105,6 +111,7 @@ public class DataHandlingUtils {
         Map<String, Object> orderInfo = new HashMap<>();
         orderInfo.put("ordered_by", orderer);
         orderInfo.put("order_time", FieldValue.serverTimestamp());
+        orderInfo.put("menu_item_ids", Arrays.asList("hello", "you", "are", "gey"));
         // Combine documentSnapshot and orderInfo Maps
         orderInfo.putAll(documentSnapshot.getData());
 
@@ -112,6 +119,65 @@ public class DataHandlingUtils {
                 .document("aqvUJjyokpta9KyBFz9U")
                 .collection("current_orders").document()
                 .set(orderInfo);
+    }
+
+    public void orderItems(FirebaseAuth mAuth,
+                           final FirebaseFirestore db,
+                           Context context,
+                           ArrayList idArray) {
+        // if there is something in the order array, begin fireStore transaction
+        if (!idArray.isEmpty()) {
+            Toast.makeText(context, "You ordered " + String.valueOf(idArray.size()) + " items", Toast.LENGTH_LONG).show();
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            String orderer = currentUser.getDisplayName();
+
+            final Map<String, Object> orderInfo = new HashMap<>();
+            orderInfo.put("ordered_by", orderer);
+            orderInfo.put("order_time", FieldValue.serverTimestamp());
+            orderInfo.put("menu_item_ids", idArray);
+            Log.d(TAG, "orderItems: " + orderInfo.get("menu_item_ids"));
+
+            final String user_id = mAuth.getUid();
+
+            Log.d(TAG, "orderItems: ");
+            boolean mExists = checkIfUserExists(user_id, db);
+
+            if (mExists) {
+                Log.d(TAG, "orderItems: user exists. Set order info in their path");
+                CollectionReference itemRef = buildFirestoreUserReference(user_id, db);
+                db.collection(itemRef.getPath()).document()
+                        .set(orderInfo);
+            } else {
+                Log.d(TAG, "orderItems: user did not exist. Create user document and set order info to it.");
+                final Map<String, Object> userInfo = new HashMap<>();
+                userInfo.put("user_created_at", FieldValue.serverTimestamp());
+                db.collection("users_2")
+                        .document(user_id)
+                        .set(userInfo);
+                CollectionReference itemRef = buildFirestoreUserReference(user_id, db);
+                db.collection(itemRef.getPath()).document()
+                        .set(orderInfo);
+            }
+        } else {
+            Toast.makeText(context, "Your Order Is Empty", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private static boolean userExists;
+    public boolean checkIfUserExists(String user_id, FirebaseFirestore db) {
+        //FIXME: Learn about callback methods to change the userExists variable from within the onComplete method
+        // check if document with that user exists
+        db.collection("users_2")
+                .document(user_id)
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                Boolean exists = task.getResult().exists();
+                userExists = exists;
+            }
+        });
+
+        return userExists;
     }
 
     /**
@@ -139,8 +205,55 @@ public class DataHandlingUtils {
         preferences.add(veganSwitchPref);
         preferences.add(vegetarianSwitchPref);
 
-        // Make query that satisfies user preferences.
         Query mQuery = buildQuery(itemRef, preferences);
+        // Make query that satisfies user preferences.
         return mQuery;
     }
+
+    public void insertItemRoom(final ItemEntry itemEntry, final Context context) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                roomDb = AppDatabase.getInstance(context);
+                roomDb.ItemDao().insertItem(itemEntry);
+                return null;
+            }
+        }.execute();
+    }
+
+    public void deleteItemRoom(final ItemEntry itemEntry, final Context context) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                roomDb = AppDatabase.getInstance(context);
+                roomDb.ItemDao().deleteItem(itemEntry);
+                return null;
+            }
+        }.execute();
+    }
+
+    public void deleteAllItemsRoom(final Context context) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                roomDb = AppDatabase.getInstance(context);
+                roomDb.ItemDao().nukeTable();
+                return null;
+            }
+        }.execute();
+    }
+
+    /**
+     * Make a method that takes in the google userId that directs the user to their account to write data.
+     */
+    public CollectionReference buildFirestoreUserReference(String user_id, FirebaseFirestore db){
+        CollectionReference itemRef = db.collection("users_2")
+                .document(user_id)
+                .collection("order_info");
+        return itemRef;
+    }
+    /**
+     * Write another method that takes in the location (lat, long) to make the path to the right restaurant
+     */
+
 }

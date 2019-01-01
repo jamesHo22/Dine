@@ -18,13 +18,176 @@
         >
     </android.support.v7.widget.Toolbar>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_show_ordered_items"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="?attr/actionBarSize">
+            android:layout_height="220dp"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false">
         </android.support.v7.widget.RecyclerView>
 
-    <include layout="@layout/bottom_sheet"/>
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="#c0c0c0" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/total_LL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_margin="24dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:text="Total"
+                    android:fontFamily="sans-serif-light" />
+
+                <TextView
+                    android:id="@+id/total_price"
+                    android:layout_margin="24dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:text="$0.00"
+                    android:fontFamily="sans-serif-light" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/add_tip_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/total_LL"
+                android:text="Add Tip"
+                android:textSize="10sp"
+                android:layout_marginStart="24dp"
+                android:layout_marginBottom="2dp"/>
+
+            <LinearLayout
+                android:id="@+id/tip_amount_LL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_below="@+id/add_tip_tv"
+                android:layout_marginTop="2dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp">
+
+                <FrameLayout
+                    android:id="@+id/tip_cv_5"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:layout_margin="8dp">
+
+                    <ImageView
+                        android:src="@drawable/selector"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitXY"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5%"
+                        android:gravity="center"
+                        android:layout_gravity="center"/>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/tip_cv_10"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:layout_margin="8dp">
+
+                    <ImageView
+                        android:src="@drawable/selector"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitXY"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10%"
+                        android:gravity="center"
+                        android:layout_gravity="center"/>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/tip_cv_15"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:layout_margin="8dp">
+
+                    <ImageView
+                        android:src="@drawable/selector"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitXY"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="15%"
+                        android:gravity="center"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_below="@+id/tip_amount_LL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Please Pay At Counter"
+                android:layout_margin="24dp"/>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:padding="20dp"
+                app:cardCornerRadius="4dp"
+                android:layout_margin="8dp"
+                app:cardBackgroundColor="@color/colorLightPink">
+
+                <TextView
+                    android:id="@+id/place_order"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:padding="20dp"
+                    android:textAllCaps="true"
+                    android:textSize="14sp"
+                    android:textColor="#FFFFFF"
+                    android:gravity="center_horizontal"
+                    android:text="Place Order" />
+            </android.support.v7.widget.CardView>
+
+
+        </RelativeLayout>
+
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -27,6 +27,9 @@ public interface ItemDao {
     @Delete
     void deleteItem(ItemEntry itemEntry);
 
+    @Query("DELETE FROM ItemsTable")
+    public void nukeTable();
+
     @Query("SELECT * FROM ItemsTable WHERE id = :id")
     LiveData<ItemEntry> loadItemById(int id);
 }
