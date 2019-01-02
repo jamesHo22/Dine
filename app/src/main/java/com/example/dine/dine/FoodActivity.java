@@ -6,6 +6,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,6 +29,7 @@ import com.example.dine.dine.RoomDb.ItemEntry;
 import com.example.dine.dine.uiDrawers.FirestoreItemAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlaceLikelihood;
@@ -42,7 +44,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 
-public class FoodActivity extends AppCompatActivity {
+public class FoodActivity extends AppCompatActivity implements LocationListener {
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 25;
 
     // TODO(1): (Completed) Display Firestore data in recyclerviews
@@ -67,6 +69,9 @@ public class FoodActivity extends AppCompatActivity {
     protected PlaceDetectionClient mPlaceDetectionClient;
     private android.support.v7.widget.Toolbar myToolbar;
     private AppDatabase roomDb;
+
+    //Location stuff
+    private Location mCurrentLocation;
 
     // inflates the menu
     @Override
@@ -95,6 +100,14 @@ public class FoodActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocationUtils locationUtils = new LocationUtils();
+        locationUtils.init(this);
+        mCurrentLocation = locationUtils.getCoordinates(this);
     }
 
     @Override
@@ -190,8 +203,6 @@ public class FoodActivity extends AppCompatActivity {
      * calls PlacesAPI's getCurrentLocation and returns a list of nearby places. Updates the UI with the more accurate one
      */
     private void getLocation() {
-        // Temporary location tag
-        //final TextView location_tv = findViewById(R.id.current_location);
 
         @SuppressLint("MissingPermission") final Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
         placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
@@ -214,6 +225,16 @@ public class FoodActivity extends AppCompatActivity {
                 likelyPlaces.release();
             }
         });
+    }
+
+    /**
+     * Does something when the users location changes
+     * @param location
+     */
+    @Override
+    public void onLocationChanged(Location location) {
+        Log.d(TAG, "onLocationChanged: location has changed");
+        Log.d(TAG, "onLocationChanged: Lat: " + location.getLatitude() + " Long: " + location.getLongitude());
     }
 
     /**
@@ -300,6 +321,11 @@ public class FoodActivity extends AppCompatActivity {
         DataHandlingUtils.makePrefQuery(this, itemRef);
         setUpRecyclerView();
         mFirestoreAdapter.startListening();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override
