@@ -9,7 +9,7 @@ import android.util.Log;
 /**
  * Creates the database connection
  */
-@Database(entities = {ItemEntry.class}, version = 2, exportSchema = false)
+@Database(entities = {ItemEntry.class, LocationEntry.class}, version = 2, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static final String LOG_TAG = AppDatabase.class.getSimpleName();
@@ -38,4 +38,5 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     public abstract ItemDao ItemDao();
+    public abstract LocationDao LocationDao();
 }

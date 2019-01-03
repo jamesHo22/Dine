@@ -40,7 +40,7 @@ public class FirestoreItemAdapter extends FirestoreRecyclerAdapter<Item, Firesto
     @Override
     protected void onBindViewHolder(@NonNull FirestoreItemHolder holder, int position, @NonNull Item model) {
         Log.d(TAG, "onBindViewHolder: " + mViewStyle);
-
+        //FIXME: remove the viewStyle thing
         switch (mViewStyle){
             case MENU_ORDERING_STYLE:
                 Log.d(TAG, "onBindViewHolder: MENU_ORDERING_STYLE");

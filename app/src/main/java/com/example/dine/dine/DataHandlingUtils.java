@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.example.dine.dine.RoomDb.AppDatabase;
 import com.example.dine.dine.RoomDb.ItemEntry;
+import com.example.dine.dine.RoomDb.LocationEntry;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -216,6 +217,17 @@ public class DataHandlingUtils {
             protected Void doInBackground(Void... voids) {
                 roomDb = AppDatabase.getInstance(context);
                 roomDb.ItemDao().insertItem(itemEntry);
+                return null;
+            }
+        }.execute();
+    }
+
+    public void insertLocationRoom(final LocationEntry locationEntry, final Context context) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                roomDb = AppDatabase.getInstance(context);
+                roomDb.LocationDao().insertLocation(locationEntry);
                 return null;
             }
         }.execute();

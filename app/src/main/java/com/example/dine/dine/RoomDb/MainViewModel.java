@@ -18,6 +18,7 @@ public class MainViewModel extends AndroidViewModel {
     private static final String TAG = MainViewModel.class.getSimpleName();
 
     private LiveData<List<ItemEntry>> items;
+    private LiveData<List<LocationEntry>> locations;
     private AppDatabase mDb = AppDatabase.getInstance(this.getApplication());
 
     /**
@@ -28,9 +29,11 @@ public class MainViewModel extends AndroidViewModel {
         super(application);
         Log.d(TAG, "MainViewModel: Actively retrieving from the Database");
         items = mDb.ItemDao().loadAllItems();
+        locations = mDb.LocationDao().loadAllLocations();
     }
 
     public LiveData<List<ItemEntry>> getItems() {
         return items;
     }
+    public LiveData<List<LocationEntry>> getLocations() {return locations;}
 }

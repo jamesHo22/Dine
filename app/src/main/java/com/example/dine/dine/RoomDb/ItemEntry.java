@@ -10,8 +10,9 @@ import android.arch.persistence.room.PrimaryKey;
  */
 
 @Entity(tableName = "ItemsTable")
-public class ItemEntry {
+public class ItemEntry implements BaseModel{
 
+    public int VIEW_TYPE_ITEMS = ViewType.VIEW_TYPE_ITEMS;
     @PrimaryKey(autoGenerate = true)
     public int id;
     public String item_id;
@@ -47,4 +48,9 @@ public class ItemEntry {
     public String getDescription() { return this.description; }
 
     public int getPrice() { return this.price; }
+
+    @Override
+    public int getViewType() {
+        return VIEW_TYPE_ITEMS;
+    }
 }

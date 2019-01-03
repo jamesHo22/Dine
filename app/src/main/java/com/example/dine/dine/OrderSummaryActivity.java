@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.dine.dine.RoomDb.BaseModel;
 import com.example.dine.dine.RoomDb.ItemEntry;
 import com.example.dine.dine.RoomDb.MainViewModel;
 import com.example.dine.dine.uiDrawers.RoomRecyclerViewAdapter;
@@ -95,7 +96,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
      */
     private void setUpRecyclerView() {
 
-        mAdapter = new RoomRecyclerViewAdapter(new ArrayList<ItemEntry>());
+        mAdapter = new RoomRecyclerViewAdapter(new ArrayList<ItemEntry>(), this);
         RecyclerView recyclerView = findViewById(R.id.rv_show_ordered_items);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -145,14 +146,14 @@ public class OrderSummaryActivity extends AppCompatActivity {
                 // Do something when the item is swiped
                 // Right now it will show a toast saying which direction you swiped.
                 String mDirection;
-                List<ItemEntry> mItemEntries;
+                List<? extends BaseModel> mItemEntries;
                 int position = viewHolder.getAdapterPosition();
                 if (direction==ItemTouchHelper.RIGHT) {
                     mDirection = "right";
 
                     int adapterPosition = viewHolder.getAdapterPosition();
                     mItemEntries = mAdapter.getItemEntries();
-                    dataHandlingUtils.deleteItemRoom(mItemEntries.get(adapterPosition), getApplicationContext());
+                    //dataHandlingUtils.deleteItemRoom(mItemEntries.get(adapterPosition), getApplicationContext());
                 } else {
                     mDirection = "left";
                     // Do not delete the item.

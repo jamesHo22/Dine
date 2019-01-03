@@ -26,6 +26,7 @@ import com.example.dine.dine.RoomDb.AddItemViewModel;
 import com.example.dine.dine.RoomDb.AddItemViewModelFactory;
 import com.example.dine.dine.RoomDb.AppDatabase;
 import com.example.dine.dine.RoomDb.ItemEntry;
+import com.example.dine.dine.RoomDb.LocationEntry;
 import com.example.dine.dine.uiDrawers.FirestoreItemAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -44,7 +45,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 
-public class FoodActivity extends AppCompatActivity implements LocationListener {
+public class FoodActivity extends AppCompatActivity implements LocationListener, BottomSheetDialogue.BottomSheetListener {
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 25;
 
     // TODO(1): (Completed) Display Firestore data in recyclerviews
@@ -96,10 +97,19 @@ public class FoodActivity extends AppCompatActivity implements LocationListener 
                 startActivity(intent);
 
                 return true;
+            case R.id.change_location:
+                BottomSheetDialogue bottomSheetDialogue = new BottomSheetDialogue();
+                bottomSheetDialogue.show(getSupportFragmentManager(), "example_bottom_sheet");
 
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    // Must overide this method for dialog fragment bottom sheet to communicate to this Activity
+    @Override
+    public void onButtonClicked(String text) {
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -133,9 +143,17 @@ public class FoodActivity extends AppCompatActivity implements LocationListener 
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //setupViewModel();
+
+                LocationEntry locationEntry = new LocationEntry("woot",
+                        "James Town",
+                        "2251 140A Street, Surrey BC", (float) 49.043220, (float) -122.833310, (float) 0);
+
+                DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
+                dataHandlingUtils.insertLocationRoom(locationEntry, getApplicationContext());
+
                 Intent intent = new Intent(getApplicationContext(), OrderSummaryActivity.class);
                 startActivity(intent);
+
             }
         });
 
