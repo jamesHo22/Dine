@@ -122,6 +122,13 @@ public class DataHandlingUtils {
                 .set(orderInfo);
     }
 
+    /**
+     * Orders an Array of items and puts them in a firestore order document
+     * @param mAuth
+     * @param db
+     * @param context
+     * @param idArray
+     */
     public void orderItems(FirebaseAuth mAuth,
                            final FirebaseFirestore db,
                            Context context,
@@ -239,6 +246,17 @@ public class DataHandlingUtils {
             protected Void doInBackground(Void... voids) {
                 roomDb = AppDatabase.getInstance(context);
                 roomDb.ItemDao().deleteItem(itemEntry);
+                return null;
+            }
+        }.execute();
+    }
+
+    public void deleteAllLocationsRoom(final Context context) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                roomDb = AppDatabase.getInstance(context);
+                roomDb.LocationDao().nukeTable();
                 return null;
             }
         }.execute();

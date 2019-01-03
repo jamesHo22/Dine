@@ -24,7 +24,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrderSummaryActivity extends AppCompatActivity {
+public class OrderSummaryActivity extends AppCompatActivity implements RoomRecyclerViewAdapter.ClickHandler {
 
     //TODO (1 Complete): get the document IDs from the MainViewModel
     //TODO (2): make a query to FireStore to get only those documents
@@ -96,7 +96,7 @@ public class OrderSummaryActivity extends AppCompatActivity {
      */
     private void setUpRecyclerView() {
 
-        mAdapter = new RoomRecyclerViewAdapter(new ArrayList<ItemEntry>(), this);
+        mAdapter = new RoomRecyclerViewAdapter(new ArrayList<ItemEntry>(), this, this);
         RecyclerView recyclerView = findViewById(R.id.rv_show_ordered_items);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -128,6 +128,8 @@ public class OrderSummaryActivity extends AppCompatActivity {
         // Set itemtouch helper to recycler view
         //Add the swiping cards functionality using the simple callback
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+
 
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -180,6 +182,11 @@ public class OrderSummaryActivity extends AppCompatActivity {
 //
 //            }
 //        });
+    }
+
+    @Override
+    public void onClick(String locationID) {
+
     }
 
     @Override

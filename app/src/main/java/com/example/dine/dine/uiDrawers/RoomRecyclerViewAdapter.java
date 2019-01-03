@@ -100,20 +100,48 @@ public class RoomRecyclerViewAdapter extends RecyclerView.Adapter<RoomRecyclerVi
     /**
      * Learning to use one adapter for different datatypes. REMEMBER to notifyDataSetChanged to update views
      */
-
     private List<? extends BaseModel> mList;
     private LayoutInflater mInflator;
+    // A variable to holds a reference to the UI that displays the views
+    private ClickHandler mClickHandler;
 
-    public RoomRecyclerViewAdapter(List<? extends BaseModel> list, Context context) {
-        //this.mList = list;
-        this.mInflator = LayoutInflater.from(context);
+    // Create an interface that the UI activity implements to pass the click events from the RV to the activity
+    public interface ClickHandler {
+        void onClick(String locationID);
     }
 
+    /**
+     *
+     * @param list is a list of objects that extends BaseModel
+     * @param context is the context of the activity or fragment that shows the RV
+     * @param clickHandler is what is handling the clicks in the UI (ex. the BottomSheetFragment)
+     */
+    public RoomRecyclerViewAdapter(List<? extends BaseModel> list, Context context, ClickHandler clickHandler) {
+        //this.mList = list;
+        this.mInflator = LayoutInflater.from(context);
+
+        try {
+            // Set the click handler to the UI component
+            this.mClickHandler = clickHandler;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement onClick()");
+        }
+
+    }
+
+    /**
+     * Adds objects to the mList variable
+     * @param list is any object that implements BaseModel
+     */
     public void addItems(List<? extends BaseModel> list) {
         this.mList = list;
         notifyDataSetChanged();
     }
 
+    /**
+     * A ViewHolder class extends this one. Each one can be used given the itemDataType
+     * @param <T> represents the data type
+     */
     public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
         public BaseViewHolder(View itemView) {
             super(itemView);
@@ -122,6 +150,9 @@ public class RoomRecyclerViewAdapter extends RecyclerView.Adapter<RoomRecyclerVi
         public abstract void bind(T object);
     }
 
+    /**
+     * This class is responsible for referencing views that show ItemEntries
+     */
     public class ItemHolder extends BaseViewHolder<ItemEntry> {
 
         private TextView orderSummaryTitleTv;
@@ -146,29 +177,60 @@ public class RoomRecyclerViewAdapter extends RecyclerView.Adapter<RoomRecyclerVi
         }
     }
 
-    public class LocationHolder extends BaseViewHolder<LocationEntry> {
+    /**
+     * This class is responsible for referencing views that show LocationEntries
+     */
+    public class LocationHolder extends BaseViewHolder<LocationEntry> implements RecyclerView.OnClickListener {
 
         private TextView nameTv;
         private TextView addressTv;
+        private String locationId;
 
         public LocationHolder(View locationView) {
             super(locationView);
             nameTv = locationView.findViewById(R.id.location_name);
             addressTv = locationView.findViewById(R.id.location_address);
+            // Remember to set the click listener
+            locationView.setOnClickListener(this);
         }
         @Override
         public void bind(LocationEntry object) {
             nameTv.setText(object.getName());
             addressTv.setText(object.getAddress());
+            locationId = object.getLocation_id();
+        }
+
+        /**
+         * This method overrides the RecyclerView.OnClickListener onClick method.
+         * You then pass information to the activity/fragment that implements ClickHandler by using the onClick method
+         * @param v is the view that was clicked on
+         */
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            String testItem = "Clicked on item ";
+            Log.d(TAG, "onClick: " + testItem + adapterPosition);
+            mClickHandler.onClick(locationId);
         }
     }
 
+    /**
+     * Binds the information to the views.
+     * @param holder
+     * @param position
+     */
     @Override
     @SuppressWarnings("unchecked")
     public void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
         holder.bind(mList.get(position));
     }
 
+    /**
+     * Determines which ViewHolder to use given the itemViewType
+     * @param parent
+     * @param viewType is the type of view. Value is given by getItemViewType()
+     * @return a view holder
+     */
     @NonNull
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -193,12 +255,20 @@ public class RoomRecyclerViewAdapter extends RecyclerView.Adapter<RoomRecyclerVi
         }
     }
 
+    /**
+     * Determines which viewType the list item is
+     * @param position
+     * @return
+     */
     @Override
     public int getItemViewType(int position) {
         Log.d(TAG, "getItemViewType: " + mList.get(position).getViewType());
         return mList.get(position).getViewType();
     }
 
+    /**
+     * @return the list of objects
+     */
     public List<? extends BaseModel> getItemEntries() {
         return mList;
     }

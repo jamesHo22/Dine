@@ -12,7 +12,7 @@ import java.util.List;
 @Dao
 public interface LocationDao {
 
-    @Query("SELECT * FROM LocationTable ORDER BY id")
+    @Query("SELECT * FROM LocationTable ORDER BY distance")
     LiveData<List<LocationEntry>> loadAllLocations();
 
     @Insert

@@ -20,7 +20,7 @@ import com.example.dine.dine.uiDrawers.RoomRecyclerViewAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BottomSheetDialogue extends BottomSheetDialogFragment {
+public class BottomSheetDialogue extends BottomSheetDialogFragment implements RoomRecyclerViewAdapter.ClickHandler {
 
     private static final String TAG = BottomSheetListener.class.getSimpleName();
 
@@ -44,7 +44,7 @@ public class BottomSheetDialogue extends BottomSheetDialogFragment {
 
 //        // You can access the views within the bottom sheet as if it were an Activity
         mMainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        mAdapter = new RoomRecyclerViewAdapter(new ArrayList<LocationEntry>(), getContext());
+        mAdapter = new RoomRecyclerViewAdapter(new ArrayList<LocationEntry>(), getContext(), this);
         RecyclerView locationRv = v.findViewById(R.id.location_rv);
         locationRv.setHasFixedSize(true);
         locationRv.setLayoutManager(new LinearLayoutManager(v.getContext()));
@@ -69,7 +69,7 @@ public class BottomSheetDialogue extends BottomSheetDialogFragment {
          * parameters can be set to anything you want to pass from the fragment to the activity.
          * @param text
          */
-        void onButtonClicked(String text);
+        void onLocationClicked(String text);
     }
 
     /**
@@ -89,5 +89,11 @@ public class BottomSheetDialogue extends BottomSheetDialogFragment {
             throw new ClassCastException(context.toString() + " must implement BottomSheetListener");
         }
 
+    }
+
+    @Override
+    public void onClick(String locationID) {
+        mListener.onLocationClicked(locationID);
+        dismiss();
     }
 }

@@ -33,7 +33,6 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -45,7 +44,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 
-public class FoodActivity extends AppCompatActivity implements LocationListener, BottomSheetDialogue.BottomSheetListener {
+public class FoodActivity extends AppCompatActivity implements LocationListener, BottomSheetDialogue.BottomSheetListener, LocationUtils.LocationUpdateListener {
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 25;
 
     // TODO(1): (Completed) Display Firestore data in recyclerviews
@@ -72,7 +71,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     private AppDatabase roomDb;
 
     //Location stuff
-    private Location mCurrentLocation;
+    private static Location mCurrentLocation;
 
     // inflates the menu
     @Override
@@ -107,17 +106,23 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     }
 
     // Must overide this method for dialog fragment bottom sheet to communicate to this Activity
+
+
+    /**
+     * Implement this method to get information from the bottomSheet
+     */
     @Override
-    public void onButtonClicked(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+    public void onLocationClicked(String locationId) {
+        Toast.makeText(this, locationId, Toast.LENGTH_SHORT).show();
+        //TODO: Change the path to the locationID
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         LocationUtils locationUtils = new LocationUtils();
-        locationUtils.init(this);
-        mCurrentLocation = locationUtils.getCoordinates(this);
+        locationUtils.init(getApplicationContext(), this);
+        locationUtils.getCoordinates(this);
     }
 
     @Override
@@ -143,17 +148,8 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                LocationEntry locationEntry = new LocationEntry("woot",
-                        "James Town",
-                        "2251 140A Street, Surrey BC", (float) 49.043220, (float) -122.833310, (float) 0);
-
-                DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
-                dataHandlingUtils.insertLocationRoom(locationEntry, getApplicationContext());
-
                 Intent intent = new Intent(getApplicationContext(), OrderSummaryActivity.class);
                 startActivity(intent);
-
             }
         });
 
@@ -217,8 +213,14 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         }
     }
 
+    @Override
+    public void onLocationUpdate(Location location) {
+        mCurrentLocation = location;
+    }
+
     /**
      * calls PlacesAPI's getCurrentLocation and returns a list of nearby places. Updates the UI with the more accurate one
+     * Temporarily inserts the locations into the ROOM database
      */
     private void getLocation() {
 
@@ -226,19 +228,39 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
             @Override
             public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
+
                 PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
 
                 String name = likelyPlaces.get(0).getPlace().getName().toString();
-                float probability = likelyPlaces.get(0).getLikelihood();
-                com.google.android.gms.maps.model.LatLng coordinates = likelyPlaces.get(0).getPlace().getLatLng();
                 myToolbar.setTitle(name);
-                Log.d(TAG, "onComplete: ");
-                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                    Log.i(TAG, String.format("Place '%s' has likelihood: %g coordinates: %s",
-                            placeLikelihood.getPlace().getName(),
-                            placeLikelihood.getLikelihood(),
-                            String.valueOf(coordinates)
-                    ));
+
+                DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
+                dataHandlingUtils.deleteAllLocationsRoom(getApplicationContext());
+
+                for (int i = 0; i<likelyPlaces.getCount()/2; i++) {
+
+                    // Get all the variables from data source
+                    String location_id = likelyPlaces.get(i).getPlace().getId();
+                    String location_name = likelyPlaces.get(i).getPlace().getName().toString();
+                    String address = likelyPlaces.get(i).getPlace().getAddress().toString();
+                    double latitude = likelyPlaces.get(i).getPlace().getLatLng().latitude;
+                    double longitude = likelyPlaces.get(i).getPlace().getLatLng().longitude;
+                    Location POI = new Location("current location");
+                    POI.setLatitude(latitude);
+                    POI.setLongitude(longitude);
+                    double distance = mCurrentLocation.distanceTo(POI);
+
+//                    Log.i(TAG, String.format("Place '%s' has likelihood: '%g' address: '%s' lat: '%g' long: '%g' distance: '%g'",
+//                            likelyPlaces.get(i).getPlace().getName(),
+//                            likelyPlaces.get(i).getLikelihood(),
+//                            likelyPlaces.get(i).getPlace().getAddress(),
+//                            likelyPlaces.get(i).getPlace().getLatLng().latitude,
+//                            likelyPlaces.get(i).getPlace().getLatLng().longitude,
+//                            distance
+//                            ));
+
+                    LocationEntry locationEntry = new LocationEntry(location_id, location_name, address, latitude, longitude, distance);
+                    dataHandlingUtils.insertLocationRoom(locationEntry, getApplicationContext());
                 }
                 likelyPlaces.release();
             }

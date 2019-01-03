@@ -19,12 +19,12 @@ public class LocationEntry implements BaseModel {
     public String location_id;
     public String name;
     public String address;
-    public float latitude;
-    public float longitude;
-    public float distance;
+    public double latitude;
+    public double longitude;
+    public double distance;
 
     @Ignore
-    public LocationEntry(String location_id, String name, String address, float latitude, float longitude, float distance) {
+    public LocationEntry(String location_id, String name, String address, double latitude, double longitude, double distance) {
         this.location_id = location_id;
         this.name = name;
         this.address = address;
@@ -33,7 +33,7 @@ public class LocationEntry implements BaseModel {
         this.distance = distance;
     }
 
-    public LocationEntry(int id, String location_id, String name, String address, float latitude, float longitude, float distance) {
+    public LocationEntry(int id, String location_id, String name, String address, double latitude, double longitude, double distance) {
         this.id = id;
         this.location_id = location_id;
         this.name = name;
@@ -43,11 +43,11 @@ public class LocationEntry implements BaseModel {
         this.distance = distance;
     }
 
-    public float getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public float getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
@@ -67,7 +67,7 @@ public class LocationEntry implements BaseModel {
         return name;
     }
 
-    public float getDistance() {
+    public double getDistance() {
         return distance;
     }
 

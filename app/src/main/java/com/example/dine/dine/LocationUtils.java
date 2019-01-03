@@ -4,8 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -32,20 +30,27 @@ public class LocationUtils {
     private static Location mCurrentLocation;
 
     private static String mLastUpdateTime;
+    private LocationUpdateListener locationUpdateListener;
+
+    public interface LocationUpdateListener {
+        void onLocationUpdate(Location location);
+    }
 
     /**
      * initializes variables that are used to determine the current location of the client
      * @param context of the activity that calls it.
      */
-    public void init(final Context context) {
+    public void init(final Context context, LocationUpdateListener mLocationUpdateListener) {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
         mSettingsClient = LocationServices.getSettingsClient(context);
+        locationUpdateListener = mLocationUpdateListener;
 
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 mCurrentLocation = locationResult.getLastLocation();
+                locationUpdateListener.onLocationUpdate(mCurrentLocation);
                 mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
                 Toast.makeText(context, "Your current location is: Lat: " + mCurrentLocation.getLatitude() + " Long: " + mCurrentLocation.getLongitude(), Toast.LENGTH_LONG).show();
                 Log.d(TAG, "onLocationResult: Lat: " + mCurrentLocation.getLatitude() + " Long: " + mCurrentLocation.getLongitude());
@@ -57,33 +62,9 @@ public class LocationUtils {
         mLocationRequest
                 .setSmallestDisplacement(1)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        LocationListener locationListener = new LocationListener() {
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-
-            @Override
-            public void onLocationChanged(Location location) {
-
-            }
-        };
-
     }
 
-    public Location getCoordinates(Context context) {
+    public void getCoordinates(Context context) {
         if (ActivityCompat.checkSelfPermission( context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -94,6 +75,5 @@ public class LocationUtils {
             // for ActivityCompat#requestPermissions for more details.
         }
         mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
-        return mCurrentLocation;
     }
 }
