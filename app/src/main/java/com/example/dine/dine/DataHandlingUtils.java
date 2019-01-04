@@ -2,6 +2,7 @@ package com.example.dine.dine;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.preference.PreferenceManager;
@@ -12,6 +13,7 @@ import com.example.dine.dine.RoomDb.AppDatabase;
 import com.example.dine.dine.RoomDb.ItemEntry;
 import com.example.dine.dine.RoomDb.LocationEntry;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -20,6 +22,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +41,44 @@ public class DataHandlingUtils {
     public static void DataHandlingUtils() {
     }
 
+    public static CollectionReference getQueryPath(FirebaseFirestore mDb, String restaurant_id){
+        //TODO: need to check if document exists
+        CollectionReference itemRef = mDb.collection("restaurants_2").document(restaurant_id).collection("menu_items");
+        return itemRef;
+    }
+
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference itemRef = db.collection("restaurants_2");
+
+    public void getLocations(final Location mCurrentLocation, final Context context){
+        itemRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                for (int i = 0; i < queryDocumentSnapshots.getDocuments().size(); i++) {
+                    DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(i);
+                    String location_id = documentSnapshot.getId();
+                    String name = documentSnapshot.getString("name");
+                    String address = documentSnapshot.getString("address");
+                    double latitude = documentSnapshot.getGeoPoint("lat_long").getLatitude();
+                    double longitude = documentSnapshot.getGeoPoint("lat_long").getLongitude();
+                    // Use current location to calculate distance
+                    Location POI = new Location("current location");
+                    POI.setLatitude(latitude);
+                    POI.setLongitude(longitude);
+                    double distance = mCurrentLocation.distanceTo(POI);
+
+                    DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
+                    LocationEntry locationEntry = new LocationEntry(location_id, name, address, latitude, longitude, distance);
+                    dataHandlingUtils.insertLocationRoom(locationEntry, context);
+
+
+                    Log.d(TAG, "Doc Id: " + documentSnapshot.getId() + " onEvent: " + name + " lat: " + latitude + " long: " + longitude + " distance " + distance);
+                }
+            }
+        });
+
+
+    }
     /**
      * this builds a query for FireStore that satisfies the user preferences
      * @param itemRef is the initial path to the collection
@@ -171,6 +212,9 @@ public class DataHandlingUtils {
         }
     }
 
+    /**
+     * Checks if a user document exists
+     */
     private static boolean userExists;
     public boolean checkIfUserExists(String user_id, FirebaseFirestore db) {
         //FIXME: Learn about callback methods to change the userExists variable from within the onComplete method
@@ -184,7 +228,6 @@ public class DataHandlingUtils {
                 userExists = exists;
             }
         });
-
         return userExists;
     }
 

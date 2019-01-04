@@ -184,6 +184,7 @@ public class OrderSummaryActivity extends AppCompatActivity implements RoomRecyc
 //        });
     }
 
+    // OnClick for RV
     @Override
     public void onClick(String locationID) {
 

@@ -64,6 +64,15 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     private CollectionReference itemRef = db.collection("restaurants")
             .document("aqvUJjyokpta9KyBFz9U")
             .collection("all_items");
+
+    /**
+     * The following path is for the updated DB
+     */
+//    private CollectionReference itemRef = db.collection("restaurants_2")
+//            .document("TZs7LD60OiZFHGu6CWz1")
+//            .collection("menu_items");
+
+
     private FirestoreRecyclerAdapter mFirestoreAdapter;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
@@ -130,6 +139,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food);
         // check user preferences before loading anything
+        //itemRef = DataHandlingUtils.getQueryPath(db,"TZs7LD60OiZFHGu6CWz1");
         DataHandlingUtils.makePrefQuery(this, itemRef);
         setUpRecyclerView();
 
@@ -213,6 +223,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         }
     }
 
+    // essentially a callback from LocationUtils
     @Override
     public void onLocationUpdate(Location location) {
         mCurrentLocation = location;
@@ -236,6 +247,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
 
                 DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
                 dataHandlingUtils.deleteAllLocationsRoom(getApplicationContext());
+                dataHandlingUtils.getLocations(mCurrentLocation, getApplicationContext());
 
                 for (int i = 0; i<likelyPlaces.getCount()/2; i++) {
 
@@ -250,14 +262,15 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
                     POI.setLongitude(longitude);
                     double distance = mCurrentLocation.distanceTo(POI);
 
-//                    Log.i(TAG, String.format("Place '%s' has likelihood: '%g' address: '%s' lat: '%g' long: '%g' distance: '%g'",
-//                            likelyPlaces.get(i).getPlace().getName(),
-//                            likelyPlaces.get(i).getLikelihood(),
-//                            likelyPlaces.get(i).getPlace().getAddress(),
-//                            likelyPlaces.get(i).getPlace().getLatLng().latitude,
-//                            likelyPlaces.get(i).getPlace().getLatLng().longitude,
-//                            distance
-//                            ));
+                    Log.i(TAG, String.format("Location_id '%s' Place '%s' has likelihood: '%g' address: '%s' lat: '%g' long: '%g' distance: '%g'",
+                            likelyPlaces.get(i).getPlace().getId(),
+                            likelyPlaces.get(i).getPlace().getName(),
+                            likelyPlaces.get(i).getLikelihood(),
+                            likelyPlaces.get(i).getPlace().getAddress(),
+                            likelyPlaces.get(i).getPlace().getLatLng().latitude,
+                            likelyPlaces.get(i).getPlace().getLatLng().longitude,
+                            distance
+                            ));
 
                     LocationEntry locationEntry = new LocationEntry(location_id, location_name, address, latitude, longitude, distance);
                     dataHandlingUtils.insertLocationRoom(locationEntry, getApplicationContext());
