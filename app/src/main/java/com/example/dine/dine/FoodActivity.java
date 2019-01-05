@@ -146,37 +146,39 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         locationEntry.observe(this, new Observer<LocationEntry>() {
             @Override
             public void onChanged(@Nullable final LocationEntry locationEntry) {
-                final String documentId = locationEntry.getLocation_id();
-                mRestaurantDocumentId = documentId;
-                //if the documentId exists, check if the firestore document with the same ID exists
-                if (documentId!=null) {
-                    // Document ID exists, check Firestore
-                    db.collection("restaurants_2")
-                            .document(documentId)
-                            .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            Boolean exists = task.getResult().exists();
-                            if (exists) {
-                                // Firestore doc exists: set itemRef to that document and change the toolbar name
-                                itemRef = db.collection("restaurants_2")
-                                        .document(documentId)
-                                        .collection("menu_items");
-                                Log.d(TAG, "setItemRef: " + itemRef.getPath() + "documentID: " + documentId);
-                                String name = locationEntry.getName();
-                                myToolbar.setTitle(name);
-                                // Update the RV
-                                setUpRecyclerView();
-                            } else {
-                                // Firestore doc does not exist, let the user know
-                                showNoRestaurants();
+                if (locationEntry!= null) {
+                    final String documentId = locationEntry.getLocation_id();
+                    mRestaurantDocumentId = documentId;
+                    //if the documentId exists, check if the firestore document with the same ID exists
+                    if (documentId!=null) {
+                        // Document ID exists, check Firestore
+                        db.collection("restaurants_2")
+                                .document(documentId)
+                                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                Boolean exists = task.getResult().exists();
+                                if (exists) {
+                                    // Firestore doc exists: set itemRef to that document and change the toolbar name
+                                    itemRef = db.collection("restaurants_2")
+                                            .document(documentId)
+                                            .collection("menu_items");
+                                    Log.d(TAG, "setItemRef: " + itemRef.getPath() + "documentID: " + documentId);
+                                    String name = locationEntry.getName();
+                                    myToolbar.setTitle(name);
+                                    // Update the RV
+                                    setUpRecyclerView();
+                                } else {
+                                    // Firestore doc does not exist, let the user know
+                                    showNoRestaurants();
+                                }
                             }
-                        }
-                    });
-                } else {
-                    // Document doesn't exist: log it and tell user
-                    showNoRestaurants();
-                    Log.d(TAG, "onChanged: documentId does not exist");
+                        });
+                    } else {
+                        // Document doesn't exist: log it and tell user
+                        showNoRestaurants();
+                        Log.d(TAG, "onChanged: documentId does not exist");
+                    }
                 }
             }
         });
@@ -223,6 +225,8 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     public void onLocationClicked(String locationId, int roomId) {
         //TODO: Change the path to the locationID
         setItemRef(roomId);
+        DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
+        dataHandlingUtils.deleteAllItemsRoom(this);
     }
 
     @Override
@@ -347,32 +351,32 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
                 dataHandlingUtils.deleteAllLocationsRoom(getApplicationContext());
                 dataHandlingUtils.getLocations(mCurrentLocation, getApplicationContext());
 
-                for (int i = 0; i<likelyPlaces.getCount()/2; i++) {
-
-                    // Get all the variables from data source
-                    String location_id = likelyPlaces.get(i).getPlace().getId();
-                    String location_name = likelyPlaces.get(i).getPlace().getName().toString();
-                    String address = likelyPlaces.get(i).getPlace().getAddress().toString();
-                    double latitude = likelyPlaces.get(i).getPlace().getLatLng().latitude;
-                    double longitude = likelyPlaces.get(i).getPlace().getLatLng().longitude;
-                    Location POI = new Location("current location");
-                    POI.setLatitude(latitude);
-                    POI.setLongitude(longitude);
-                    double distance = mCurrentLocation.distanceTo(POI);
-
-                    Log.i(TAG, String.format("Location_id '%s' Place '%s' has likelihood: '%g' address: '%s' lat: '%g' long: '%g' distance: '%g'",
-                            likelyPlaces.get(i).getPlace().getId(),
-                            likelyPlaces.get(i).getPlace().getName(),
-                            likelyPlaces.get(i).getLikelihood(),
-                            likelyPlaces.get(i).getPlace().getAddress(),
-                            likelyPlaces.get(i).getPlace().getLatLng().latitude,
-                            likelyPlaces.get(i).getPlace().getLatLng().longitude,
-                            distance
-                            ));
-
-                    LocationEntry locationEntry = new LocationEntry(location_id, location_name, address, latitude, longitude, distance);
-                    dataHandlingUtils.insertLocationRoom(locationEntry, getApplicationContext());
-                }
+//                for (int i = 0; i<likelyPlaces.getCount()/2; i++) {
+//
+//                    // Get all the variables from data source
+//                    String location_id = likelyPlaces.get(i).getPlace().getId();
+//                    String location_name = likelyPlaces.get(i).getPlace().getName().toString();
+//                    String address = likelyPlaces.get(i).getPlace().getAddress().toString();
+//                    double latitude = likelyPlaces.get(i).getPlace().getLatLng().latitude;
+//                    double longitude = likelyPlaces.get(i).getPlace().getLatLng().longitude;
+//                    Location POI = new Location("current location");
+//                    POI.setLatitude(latitude);
+//                    POI.setLongitude(longitude);
+//                    double distance = mCurrentLocation.distanceTo(POI);
+//
+//                    Log.i(TAG, String.format("Location_id '%s' Place '%s' has likelihood: '%g' address: '%s' lat: '%g' long: '%g' distance: '%g'",
+//                            likelyPlaces.get(i).getPlace().getId(),
+//                            likelyPlaces.get(i).getPlace().getName(),
+//                            likelyPlaces.get(i).getLikelihood(),
+//                            likelyPlaces.get(i).getPlace().getAddress(),
+//                            likelyPlaces.get(i).getPlace().getLatLng().latitude,
+//                            likelyPlaces.get(i).getPlace().getLatLng().longitude,
+//                            distance
+//                            ));
+//
+//                    LocationEntry locationEntry = new LocationEntry(location_id, location_name, address, latitude, longitude, distance);
+//                    dataHandlingUtils.insertLocationRoom(locationEntry, getApplicationContext());
+//                }
                 likelyPlaces.release();
 
                 LiveData<LocationEntry> location = roomDb.LocationDao().loadNearestLocation();

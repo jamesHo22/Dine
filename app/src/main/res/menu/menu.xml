@@ -3,12 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/change_location"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         android:title="@string/change_location"
         android:icon="@drawable/ic_edit_location_black_24dp"/>
 
+    <item android:id="@+id/action_menu"
+        android:title="@string/see_full_menu"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_restaurant_menu_white_24dp"/>
+
     <!-- Settings, should always be in the overflow -->
+
     <item android:id="@+id/action_settings"
         android:title="@string/settings"
         app:showAsAction="never"/>
+
 </menu>
