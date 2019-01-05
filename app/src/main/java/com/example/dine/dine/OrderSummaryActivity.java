@@ -155,7 +155,7 @@ public class OrderSummaryActivity extends AppCompatActivity implements RoomRecyc
 
                     int adapterPosition = viewHolder.getAdapterPosition();
                     mItemEntries = mAdapter.getItemEntries();
-                    //dataHandlingUtils.deleteItemRoom(mItemEntries.get(adapterPosition), getApplicationContext());
+                    dataHandlingUtils.deleteItemRoom((ItemEntry) mItemEntries.get(adapterPosition), getApplicationContext());
                 } else {
                     mDirection = "left";
                     // Do not delete the item.

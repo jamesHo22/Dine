@@ -75,7 +75,7 @@ public class DataHandlingUtils {
     public void getLocations(final Location mCurrentLocation, final Context context){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference itemRef = db.collection("restaurants_2");
-        itemRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        itemRef.limit(10).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 for (int i = 0; i < queryDocumentSnapshots.getDocuments().size(); i++) {

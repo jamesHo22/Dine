@@ -29,4 +29,7 @@ public interface LocationDao {
 
     @Query("SELECT * FROM LocationTable WHERE id = :id")
     LiveData<LocationEntry> loadLocationById(int id);
+
+    @Query("SELECT * FROM LocationTable ORDER BY distance LIMIT 1")
+    LiveData<LocationEntry> loadNearestLocation();
 }
