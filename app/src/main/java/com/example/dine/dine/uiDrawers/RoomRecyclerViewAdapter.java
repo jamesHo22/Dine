@@ -107,7 +107,7 @@ public class RoomRecyclerViewAdapter extends RecyclerView.Adapter<RoomRecyclerVi
 
     // Create an interface that the UI activity implements to pass the click events from the RV to the activity
     public interface ClickHandler {
-        void onClick(String locationID);
+        void onClick(String locationId, int roomId);
     }
 
     /**
@@ -185,6 +185,7 @@ public class RoomRecyclerViewAdapter extends RecyclerView.Adapter<RoomRecyclerVi
         private TextView nameTv;
         private TextView addressTv;
         private String locationId;
+        private int roomId;
 
         public LocationHolder(View locationView) {
             super(locationView);
@@ -198,6 +199,7 @@ public class RoomRecyclerViewAdapter extends RecyclerView.Adapter<RoomRecyclerVi
             nameTv.setText(object.getName());
             addressTv.setText(object.getAddress());
             locationId = object.getLocation_id();
+            roomId = object.getId();
         }
 
         /**
@@ -209,8 +211,8 @@ public class RoomRecyclerViewAdapter extends RecyclerView.Adapter<RoomRecyclerVi
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
             String testItem = "Clicked on item ";
-            Log.d(TAG, "onClick: " + testItem + adapterPosition);
-            mClickHandler.onClick(locationId);
+            Log.d(TAG, "onClick: " + roomId);
+            mClickHandler.onClick(locationId, roomId);
         }
     }
 

@@ -37,20 +37,44 @@ public class DataHandlingUtils {
 
     private final static String TAG = DataHandlingUtils.class.getSimpleName();
     private AppDatabase roomDb;
+    public static final String DOCUMENT_ID = "document_id";
 
     public static void DataHandlingUtils() {
     }
 
-    public static CollectionReference getQueryPath(FirebaseFirestore mDb, String restaurant_id){
-        //TODO: need to check if document exists
-        CollectionReference itemRef = mDb.collection("restaurants_2").document(restaurant_id).collection("menu_items");
-        return itemRef;
+    private static Boolean itemRefIsSet;
+    public static Boolean setItemRef(final String documentId, FirebaseFirestore db, final Context context){
+        itemRefIsSet = false;
+        // check if document with that user exists
+        db.collection("restaurants_2")
+                .document(documentId)
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                Boolean exists = task.getResult().exists();
+                if (exists) {
+                    SharedPreferences.Editor sharedPrefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+                    sharedPrefEditor.putString(DOCUMENT_ID, documentId);
+                    sharedPrefEditor.apply();
+                    Log.d(TAG, "onComplete: document exists and shared preferences changed");
+                    itemRefIsSet = true;
+                } else {
+                    //TODO: send a thing that changes the UI to show that the restaurant hasn't signed up
+                }
+            }
+        });
+
+        return itemRefIsSet;
     }
 
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference itemRef = db.collection("restaurants_2");
-
+    /**
+     * This method downloads all the restaurants on Firestore to a local DB and finds the distances to all of them.
+     * @param mCurrentLocation is the Location object to compare the distance to.
+     * @param context is the application context
+     */
     public void getLocations(final Location mCurrentLocation, final Context context){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference itemRef = db.collection("restaurants_2");
         itemRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -71,13 +95,10 @@ public class DataHandlingUtils {
                     LocationEntry locationEntry = new LocationEntry(location_id, name, address, latitude, longitude, distance);
                     dataHandlingUtils.insertLocationRoom(locationEntry, context);
 
-
                     Log.d(TAG, "Doc Id: " + documentSnapshot.getId() + " onEvent: " + name + " lat: " + latitude + " long: " + longitude + " distance " + distance);
                 }
             }
         });
-
-
     }
     /**
      * this builds a query for FireStore that satisfies the user preferences
@@ -231,6 +252,22 @@ public class DataHandlingUtils {
         return userExists;
     }
 
+    private static boolean RestaurantExists;
+    public boolean checkIfRestaurantExists(String restaurant_id, FirebaseFirestore db) {
+        //FIXME: Learn about callback methods to change the userExists variable from within the onComplete method
+        // check if document with that user exists
+        db.collection("restaurants_2")
+                .document(restaurant_id)
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                Boolean exists = task.getResult().exists();
+                RestaurantExists = exists;
+            }
+        });
+        return RestaurantExists;
+    }
+
     /**
      * Checks preferences then makes a query that used to call firestore
      */
@@ -261,6 +298,7 @@ public class DataHandlingUtils {
         return mQuery;
     }
 
+    //FIXME: should put all this in a viewmodel
     public void insertItemRoom(final ItemEntry itemEntry, final Context context) {
         new AsyncTask<Void, Void, Void>() {
             @Override

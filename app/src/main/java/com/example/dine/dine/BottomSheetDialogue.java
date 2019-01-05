@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,12 +45,14 @@ public class BottomSheetDialogue extends BottomSheetDialogFragment implements Ro
 
 //        // You can access the views within the bottom sheet as if it were an Activity
         mMainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+
         mAdapter = new RoomRecyclerViewAdapter(new ArrayList<LocationEntry>(), getContext(), this);
         RecyclerView locationRv = v.findViewById(R.id.location_rv);
         locationRv.setHasFixedSize(true);
         locationRv.setLayoutManager(new LinearLayoutManager(v.getContext()));
         locationRv.setAdapter(mAdapter);
 
+        // Set the items in the database to the recyclerView
         mMainViewModel.getLocations().observe(this, new Observer<List<LocationEntry>>() {
             @Override
             public void onChanged(@Nullable List<LocationEntry> locationEntries) {
@@ -69,7 +72,7 @@ public class BottomSheetDialogue extends BottomSheetDialogFragment implements Ro
          * parameters can be set to anything you want to pass from the fragment to the activity.
          * @param text
          */
-        void onLocationClicked(String text);
+        void onLocationClicked(String text, int roomId);
     }
 
     /**
@@ -92,8 +95,9 @@ public class BottomSheetDialogue extends BottomSheetDialogFragment implements Ro
     }
 
     @Override
-    public void onClick(String locationID) {
-        mListener.onLocationClicked(locationID);
+    public void onClick(String locationID, int roomID) {
+        mListener.onLocationClicked(locationID, roomID);
+        Log.d(TAG, "onClick: " + roomID);
         dismiss();
     }
 }

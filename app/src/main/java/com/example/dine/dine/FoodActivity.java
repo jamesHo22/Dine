@@ -2,6 +2,7 @@ package com.example.dine.dine;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -27,6 +28,7 @@ import com.example.dine.dine.RoomDb.AddItemViewModelFactory;
 import com.example.dine.dine.RoomDb.AppDatabase;
 import com.example.dine.dine.RoomDb.ItemEntry;
 import com.example.dine.dine.RoomDb.LocationEntry;
+import com.example.dine.dine.RoomDb.MainViewModel;
 import com.example.dine.dine.uiDrawers.FirestoreItemAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -44,7 +46,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 
-public class FoodActivity extends AppCompatActivity implements LocationListener, BottomSheetDialogue.BottomSheetListener, LocationUtils.LocationUpdateListener {
+public class FoodActivity extends AppCompatActivity implements LocationListener,
+        BottomSheetDialogue.BottomSheetListener,
+        LocationUtils.LocationUpdateListener {
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 25;
 
     // TODO(1): (Completed) Display Firestore data in recyclerviews
@@ -61,9 +65,6 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     private FirebaseAuth mAuth;
     // Add Firestore Reference
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference itemRef = db.collection("restaurants")
-            .document("aqvUJjyokpta9KyBFz9U")
-            .collection("all_items");
 
     /**
      * The following path is for the updated DB
@@ -72,16 +73,98 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
 //            .document("TZs7LD60OiZFHGu6CWz1")
 //            .collection("menu_items");
 
-
     private FirestoreRecyclerAdapter mFirestoreAdapter;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
     private android.support.v7.widget.Toolbar myToolbar;
     private AppDatabase roomDb;
+    private MainViewModel mMainViewModel;
 
     //Location stuff
     private static Location mCurrentLocation;
 
+    private CollectionReference itemRef = db.collection("restaurants")
+            .document("aqvUJjyokpta9KyBFz9U")
+                        .collection("all_items");
+
+//    /**
+//     * This method checks if the document exists and sets the itemRef variable. It also sets up the recyclerview after
+//     * itemRef is assigned a value
+//     * @param db
+//     * @return
+//     */
+//    public void getItemRef(final FirebaseFirestore db) {
+//
+//            Log.d(TAG, "getItemRef: method called");
+//            SharedPreferences prefs = android.preference.PreferenceManager.getDefaultSharedPreferences(this);
+//            final String documentId = prefs.getString(DataHandlingUtils.DOCUMENT_ID, "Id Not Set");
+//            if (!documentId.equals("Id Not Set")) {
+//                // Check if the document exists. If it does, set the itemRef to that document
+//                db.collection("restaurants_2")
+//                        .document(documentId)
+//                        .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                        Boolean exists = task.getResult().exists();
+//                        if (exists) {
+//                            itemRef = db.collection("restaurants_2")
+//                                    .document(documentId)
+//                                    .collection("menu_items");
+//
+//                            Log.d(TAG, "onComplete: document exists: " + itemRef + "documentID: " + documentId);
+//                        } else {
+//                            //TODO: send a thing that changes the UI to show that the restaurant hasn't signed up
+//                            itemRef = db.collection("restaurants")
+//                                    .document("aqvUJjyokpta9KyBFz9U")
+//                                    .collection("all_items");
+//                            Log.d(TAG, "onComplete: document no exist");
+//                        }
+//                        setUpRecyclerView();
+//                        mFirestoreAdapter.startListening();
+//                    }
+//                });
+//            } else {
+//                Log.d(TAG, "getItemRef: " + documentId);
+//                itemRef = db.collection("restaurants")
+//                        .document("aqvUJjyokpta9KyBFz9U")
+//                        .collection("all_items");
+//            }
+//    }
+
+    public void showNoRestaurants() {
+        //TODO: modify the UI to display that the selected restaurant is not signed up for Dine
+        myToolbar.setTitle("Restaurant Not Available");
+    }
+
+    public void setItemRef(final int roomLocationId) {
+        roomDb = AppDatabase.getInstance(this);
+        LiveData<LocationEntry> locationEntry = roomDb.LocationDao().loadLocationById(roomLocationId);
+        locationEntry.observe(this, new Observer<LocationEntry>() {
+            @Override
+            public void onChanged(@Nullable LocationEntry locationEntry) {
+                final String documentId = locationEntry.getLocation_id();
+                Log.d(TAG, "onClick: " + roomLocationId + " " + locationEntry);
+
+                db.collection("restaurants_2")
+                        .document(documentId)
+                        .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        Boolean exists = task.getResult().exists();
+                        if (exists) {
+                            itemRef = db.collection("restaurants_2")
+                                    .document(documentId)
+                                    .collection("menu_items");
+                            Log.d(TAG, "setItemRef: " + itemRef.getPath() + "documentID: " + documentId);
+                        } else {
+                            showNoRestaurants();
+                        }
+                        setUpRecyclerView();
+                    }
+                });
+            }
+        });
+    }
     // inflates the menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -121,27 +204,29 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
      * Implement this method to get information from the bottomSheet
      */
     @Override
-    public void onLocationClicked(String locationId) {
-        Toast.makeText(this, locationId, Toast.LENGTH_SHORT).show();
+    public void onLocationClicked(String locationId, int roomId) {
         //TODO: Change the path to the locationID
+
+        setItemRef(roomId);
+        Toast.makeText(this, locationId + "room id: " + String.valueOf(roomId), Toast.LENGTH_SHORT).show();
+        //DataHandlingUtils.setItemRef(locationId, db, this);
+        //getItemRef(db);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LocationUtils locationUtils = new LocationUtils();
-        locationUtils.init(getApplicationContext(), this);
-        locationUtils.getCoordinates(this);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //getItemRef(db);
         setContentView(R.layout.activity_food);
-        // check user preferences before loading anything
-        //itemRef = DataHandlingUtils.getQueryPath(db,"TZs7LD60OiZFHGu6CWz1");
         DataHandlingUtils.makePrefQuery(this, itemRef);
-        setUpRecyclerView();
+
+        mMainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        //setUpRecyclerView();
 
         // Setup toolbar
         myToolbar = findViewById(R.id.toolbar);
@@ -235,6 +320,12 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
      */
     private void getLocation() {
 
+        //TODO: once the nearest place has been determined, set the sharedPreference string to that location's ID
+        // This sets up an update that gets a new location every time the user moves more than a specified distance
+        LocationUtils locationUtils = new LocationUtils();
+        locationUtils.init(getApplicationContext(), this);
+        locationUtils.getCoordinates(this);
+
         @SuppressLint("MissingPermission") final Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
         placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
             @Override
@@ -243,38 +334,38 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
                 PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
 
                 String name = likelyPlaces.get(0).getPlace().getName().toString();
+
                 myToolbar.setTitle(name);
 
                 DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
                 dataHandlingUtils.deleteAllLocationsRoom(getApplicationContext());
                 dataHandlingUtils.getLocations(mCurrentLocation, getApplicationContext());
-
-                for (int i = 0; i<likelyPlaces.getCount()/2; i++) {
-
-                    // Get all the variables from data source
-                    String location_id = likelyPlaces.get(i).getPlace().getId();
-                    String location_name = likelyPlaces.get(i).getPlace().getName().toString();
-                    String address = likelyPlaces.get(i).getPlace().getAddress().toString();
-                    double latitude = likelyPlaces.get(i).getPlace().getLatLng().latitude;
-                    double longitude = likelyPlaces.get(i).getPlace().getLatLng().longitude;
-                    Location POI = new Location("current location");
-                    POI.setLatitude(latitude);
-                    POI.setLongitude(longitude);
-                    double distance = mCurrentLocation.distanceTo(POI);
-
-                    Log.i(TAG, String.format("Location_id '%s' Place '%s' has likelihood: '%g' address: '%s' lat: '%g' long: '%g' distance: '%g'",
-                            likelyPlaces.get(i).getPlace().getId(),
-                            likelyPlaces.get(i).getPlace().getName(),
-                            likelyPlaces.get(i).getLikelihood(),
-                            likelyPlaces.get(i).getPlace().getAddress(),
-                            likelyPlaces.get(i).getPlace().getLatLng().latitude,
-                            likelyPlaces.get(i).getPlace().getLatLng().longitude,
-                            distance
-                            ));
-
-                    LocationEntry locationEntry = new LocationEntry(location_id, location_name, address, latitude, longitude, distance);
-                    dataHandlingUtils.insertLocationRoom(locationEntry, getApplicationContext());
-                }
+//                for (int i = 0; i<likelyPlaces.getCount()/2; i++) {
+//
+//                    // Get all the variables from data source
+//                    String location_id = likelyPlaces.get(i).getPlace().getId();
+//                    String location_name = likelyPlaces.get(i).getPlace().getName().toString();
+//                    String address = likelyPlaces.get(i).getPlace().getAddress().toString();
+//                    double latitude = likelyPlaces.get(i).getPlace().getLatLng().latitude;
+//                    double longitude = likelyPlaces.get(i).getPlace().getLatLng().longitude;
+//                    Location POI = new Location("current location");
+//                    POI.setLatitude(latitude);
+//                    POI.setLongitude(longitude);
+//                    double distance = mCurrentLocation.distanceTo(POI);
+//
+//                    Log.i(TAG, String.format("Location_id '%s' Place '%s' has likelihood: '%g' address: '%s' lat: '%g' long: '%g' distance: '%g'",
+//                            likelyPlaces.get(i).getPlace().getId(),
+//                            likelyPlaces.get(i).getPlace().getName(),
+//                            likelyPlaces.get(i).getLikelihood(),
+//                            likelyPlaces.get(i).getPlace().getAddress(),
+//                            likelyPlaces.get(i).getPlace().getLatLng().latitude,
+//                            likelyPlaces.get(i).getPlace().getLatLng().longitude,
+//                            distance
+//                            ));
+//
+//                    LocationEntry locationEntry = new LocationEntry(location_id, location_name, address, latitude, longitude, distance);
+//                    dataHandlingUtils.insertLocationRoom(locationEntry, getApplicationContext());
+//                }
                 likelyPlaces.release();
             }
         });
@@ -296,6 +387,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     private void setUpRecyclerView() {
         // Create a query when requesting data from firestore
         Query query = DataHandlingUtils.makePrefQuery(this, itemRef);
+        Log.d(TAG, "setUpRecyclerView: " + itemRef.getPath());
         FirestoreRecyclerOptions<Item> options =  new FirestoreRecyclerOptions.Builder<Item>()
                 .setQuery(query, Item.class)
                 .build();
@@ -304,6 +396,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mFirestoreAdapter);
+        mFirestoreAdapter.startListening();
 
 
         // Set itemtouch helper to recycler view
@@ -373,7 +466,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         // FIXME: only check preference if they changed
         DataHandlingUtils.makePrefQuery(this, itemRef);
         setUpRecyclerView();
-        mFirestoreAdapter.startListening();
+        //mFirestoreAdapter.startListening();
     }
 
     @Override

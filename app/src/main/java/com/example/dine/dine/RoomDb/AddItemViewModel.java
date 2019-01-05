@@ -8,6 +8,7 @@ import android.arch.lifecycle.ViewModel;
  */
 public class AddItemViewModel extends ViewModel {
     private LiveData<ItemEntry> item;
+
     public AddItemViewModel(AppDatabase database, int itemId) {
         item = database.ItemDao().loadItemById(itemId);
     }

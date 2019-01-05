@@ -60,7 +60,7 @@ public class LocationUtils {
         // Request a new location every two seconds
         mLocationRequest = new LocationRequest();
         mLocationRequest
-                .setSmallestDisplacement(1)
+                .setSmallestDisplacement(10)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
