@@ -32,6 +32,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
     final static String INTENT_EXTRA_KEY_DETAILED_DESCRIPTION = "detailed_description";
     final static String INTENT_EXTRA_KEY_DETAILED_IMAGE_URI = "detailed_image_uri";
     final static String INTENT_EXTRA_KEY_DETAILED_PRICE = "detailed_price";
+    final static String INTENT_EXTRA_KEY_LOCATION_ID = "location_id";
 
     // create member variables
     private String mTitle;
@@ -43,9 +44,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
     // get instance of firestore
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference itemRef = db.collection("restaurants")
-            .document("aqvUJjyokpta9KyBFz9U")
-            .collection("all_items");
+
     // Set source to local to save database calls. Load document from local cache
     Source source = Source.CACHE;
 
@@ -59,7 +58,11 @@ public class ItemDetailsActivity extends AppCompatActivity {
         final String document_id = launchIntent.getStringExtra(INTENT_EXTRA_DOCUMENT_ID);
         final String title = launchIntent.getStringExtra(INTENT_EXTRA_KEY_DETAILED_TITLE);
         final String description = launchIntent.getStringExtra(INTENT_EXTRA_KEY_DETAILED_DESCRIPTION);
+        final String restaurantDocumentId = launchIntent.getStringExtra(INTENT_EXTRA_KEY_LOCATION_ID);
         final int price = launchIntent.getIntExtra(INTENT_EXTRA_KEY_DETAILED_PRICE, 1234);
+        CollectionReference itemRef = db.collection("restaurants_2")
+                .document(restaurantDocumentId)
+                .collection("menu_items");
         Log.d(TAG, "onCreate: " + document_id);
 
         //Find the views.

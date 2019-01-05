@@ -28,7 +28,6 @@ import com.example.dine.dine.RoomDb.AddItemViewModelFactory;
 import com.example.dine.dine.RoomDb.AppDatabase;
 import com.example.dine.dine.RoomDb.ItemEntry;
 import com.example.dine.dine.RoomDb.LocationEntry;
-import com.example.dine.dine.RoomDb.MainViewModel;
 import com.example.dine.dine.uiDrawers.FirestoreItemAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -78,7 +77,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     protected PlaceDetectionClient mPlaceDetectionClient;
     private android.support.v7.widget.Toolbar myToolbar;
     private AppDatabase roomDb;
-    private MainViewModel mMainViewModel;
+    private static String mRestaurantDocumentId;
 
     //Location stuff
     private static Location mCurrentLocation;
@@ -136,6 +135,10 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         myToolbar.setTitle("Restaurant Not Available");
     }
 
+    /**
+     * This method takes in a integer ID for an object in the database and sets the path of itemRef to that document_id
+     * @param roomLocationId
+     */
     public void setItemRef(final int roomLocationId) {
         roomDb = AppDatabase.getInstance(this);
         LiveData<LocationEntry> locationEntry = roomDb.LocationDao().loadLocationById(roomLocationId);
@@ -143,25 +146,30 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
             @Override
             public void onChanged(@Nullable LocationEntry locationEntry) {
                 final String documentId = locationEntry.getLocation_id();
-                Log.d(TAG, "onClick: " + roomLocationId + " " + locationEntry);
-
-                db.collection("restaurants_2")
-                        .document(documentId)
-                        .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        Boolean exists = task.getResult().exists();
-                        if (exists) {
-                            itemRef = db.collection("restaurants_2")
-                                    .document(documentId)
-                                    .collection("menu_items");
-                            Log.d(TAG, "setItemRef: " + itemRef.getPath() + "documentID: " + documentId);
-                        } else {
-                            showNoRestaurants();
+                mRestaurantDocumentId = documentId;
+                String name = locationEntry.getName();
+                myToolbar.setTitle(name);
+                if (documentId!=null) {
+                    db.collection("restaurants_2")
+                            .document(documentId)
+                            .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            Boolean exists = task.getResult().exists();
+                            if (exists) {
+                                itemRef = db.collection("restaurants_2")
+                                        .document(documentId)
+                                        .collection("menu_items");
+                                Log.d(TAG, "setItemRef: " + itemRef.getPath() + "documentID: " + documentId);
+                            } else {
+                                showNoRestaurants();
+                            }
+                            setUpRecyclerView();
                         }
-                        setUpRecyclerView();
-                    }
-                });
+                    });
+                } else {
+                    Log.d(TAG, "onChanged: documentId does not exist");
+                }
             }
         });
     }
@@ -206,11 +214,9 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     @Override
     public void onLocationClicked(String locationId, int roomId) {
         //TODO: Change the path to the locationID
-
         setItemRef(roomId);
         Toast.makeText(this, locationId + "room id: " + String.valueOf(roomId), Toast.LENGTH_SHORT).show();
         //DataHandlingUtils.setItemRef(locationId, db, this);
-        //getItemRef(db);
     }
 
     @Override
@@ -224,8 +230,6 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         //getItemRef(db);
         setContentView(R.layout.activity_food);
         DataHandlingUtils.makePrefQuery(this, itemRef);
-
-        mMainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         //setUpRecyclerView();
 
         // Setup toolbar
@@ -454,6 +458,8 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
                 detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_KEY_DETAILED_TITLE, title);
                 detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_KEY_DETAILED_DESCRIPTION, description);
                 detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_KEY_DETAILED_PRICE, price);
+                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_KEY_LOCATION_ID, mRestaurantDocumentId);
+                Log.d(TAG, "onItemClick: " + mRestaurantDocumentId);
                 startActivity(detailIntent);
             }
         });
