@@ -42,31 +42,6 @@ public class DataHandlingUtils {
     public static void DataHandlingUtils() {
     }
 
-    private static Boolean itemRefIsSet;
-    public static Boolean setItemRef(final String documentId, FirebaseFirestore db, final Context context){
-        itemRefIsSet = false;
-        // check if document with that user exists
-        db.collection("restaurants_2")
-                .document(documentId)
-                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                Boolean exists = task.getResult().exists();
-                if (exists) {
-                    SharedPreferences.Editor sharedPrefEditor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-                    sharedPrefEditor.putString(DOCUMENT_ID, documentId);
-                    sharedPrefEditor.apply();
-                    Log.d(TAG, "onComplete: document exists and shared preferences changed");
-                    itemRefIsSet = true;
-                } else {
-                    //TODO: send a thing that changes the UI to show that the restaurant hasn't signed up
-                }
-            }
-        });
-
-        return itemRefIsSet;
-    }
-
     /**
      * This method downloads all the restaurants on Firestore to a local DB and finds the distances to all of them.
      * @param mCurrentLocation is the Location object to compare the distance to.

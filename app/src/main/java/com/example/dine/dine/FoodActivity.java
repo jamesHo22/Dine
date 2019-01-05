@@ -165,12 +165,12 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
                                 Log.d(TAG, "setItemRef: " + itemRef.getPath() + "documentID: " + documentId);
                                 String name = locationEntry.getName();
                                 myToolbar.setTitle(name);
+                                // Update the RV
                                 setUpRecyclerView();
                             } else {
                                 // Firestore doc does not exist, let the user know
                                 showNoRestaurants();
                             }
-                            // Update the UI
                         }
                     });
                 } else {
@@ -223,8 +223,6 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     public void onLocationClicked(String locationId, int roomId) {
         //TODO: Change the path to the locationID
         setItemRef(roomId);
-        Toast.makeText(this, locationId + "room id: " + String.valueOf(roomId), Toast.LENGTH_SHORT).show();
-        //DataHandlingUtils.setItemRef(locationId, db, this);
     }
 
     @Override
@@ -344,10 +342,6 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
             public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
 
                 PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
-
-                String name = likelyPlaces.get(0).getPlace().getName().toString();
-
-                myToolbar.setTitle(name);
 
                 DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
                 dataHandlingUtils.deleteAllLocationsRoom(getApplicationContext());
