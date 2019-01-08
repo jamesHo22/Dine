@@ -80,14 +80,17 @@ public class OrderSummaryActivity extends AppCompatActivity implements RoomRecyc
             public void onChanged(@Nullable List<ItemEntry> itemEntries) {
                 item_ids.clear();
                 for(int i = 0; i < itemEntries.size(); i++) {
-                    item_ids.add(itemEntries.get(i).getItemId());
-                    Log.d(TAG, "onChanged: " + item_ids.get(i));
+                    if (itemEntries.get(i).getProgress()!=Constants.ITEM_ENTRY_PROGRESS_COOKING) {
+                        item_ids.add(itemEntries.get(i).getItemId());
+                        //Log.d(TAG, "onChanged: " + item_ids.get(i));
+                    }
                 }
             }
         });
 
         dataHandlingUtils.orderItems(mAuth, db, this, item_ids);
-        dataHandlingUtils.deleteAllItemsRoom(this);
+        //dataHandlingUtils.deleteAllItemsRoom(this);
+        dataHandlingUtils.updateOrderedItemsRoom(this);
         finish();
     }
 

@@ -1,10 +1,14 @@
 package com.example.dine.dine;
 
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -268,7 +272,7 @@ public class DataHandlingUtils {
         preferences.add(veganSwitchPref);
         preferences.add(vegetarianSwitchPref);
 
-        Query mQuery = buildQuery(itemRef, preferences);
+        Query mQuery = buildQuery(itemRef, preferences).orderBy("promo", Query.Direction.DESCENDING);
         // Make query that satisfies user preferences.
         return mQuery;
     }
@@ -324,6 +328,50 @@ public class DataHandlingUtils {
             protected Void doInBackground(Void... voids) {
                 roomDb = AppDatabase.getInstance(context);
                 roomDb.ItemDao().nukeTable();
+                return null;
+            }
+        }.execute();
+    }
+
+    public void updateOneItemsRoom(final Context context, final ItemEntry itemEntry) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                roomDb = AppDatabase.getInstance(context);
+                roomDb.ItemDao().updateitem(itemEntry);
+                return null;
+            }
+        }.execute();
+    }
+
+    public void updateOrderedItemsRoom(final Context context) {
+        // TODO: update the progress field to indicate that the restaurant is preparing the dish.
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                roomDb = AppDatabase.getInstance(context);
+                LiveData<List<ItemEntry>> itemEntries = roomDb.ItemDao().loadAllItems();
+                itemEntries.observe((LifecycleOwner) context, new Observer<List<ItemEntry>>() {
+                    @Override
+                    public void onChanged(@Nullable List<ItemEntry> itemEntries) {
+                        if (!itemEntries.isEmpty()) {
+                            for (int i = 0; i<itemEntries.size(); i++) {
+                                int progress = itemEntries.get(i).getProgress();
+                                if (progress == Constants.ITEM_ENTRY_PROGRESS_NOT_ORDERED) {
+                                    int id = itemEntries.get(i).getId();
+                                    String item_id = itemEntries.get(i).getItemId();
+                                    String title = itemEntries.get(i).getTitle();
+                                    String description = itemEntries.get(i).getDescription();
+                                    int price = itemEntries.get(i).getPrice();
+                                    int newProgress = Constants.ITEM_ENTRY_PROGRESS_COOKING;
+                                    ItemEntry itemEntry = new ItemEntry(id, item_id, title, description, price, newProgress);
+                                    updateOneItemsRoom(context, itemEntry);
+                                    Log.d(TAG, "onChanged: " + title + " progress: " + newProgress);
+                                }
+                            }
+                        }
+                    }
+                });
                 return null;
             }
         }.execute();

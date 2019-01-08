@@ -47,7 +47,12 @@ public class FirestoreItemAdapter extends FirestoreRecyclerAdapter<Item, Firesto
                 holder.titleTv.setText(model.getTitle());
                 holder.descriptionTv.setText(model.getDescription());
                 float price = model.getPrice();
-                holder.priceTv.setText("$ " + String.valueOf(price/100));
+
+                if (model.isPromo()) {
+                    holder.priceTv.setText("$ " + String.valueOf(price/100) + " - Daily Special");
+                } else {
+                    holder.priceTv.setText("$ " + String.valueOf(price/100));
+                }
                 // Check if a image url exists for the item
                 if (model.getImageUri() != null) {
 
@@ -58,6 +63,9 @@ public class FirestoreItemAdapter extends FirestoreRecyclerAdapter<Item, Firesto
                     // Loads the image URI from that document into the imageView.
                     Picasso.with(context).load(imageUri).fit().centerCrop().into(holder.mainIV);
                 }
+
+
+
                 break;
 
             case ORDER_SUMMARY_STYLE:

@@ -99,7 +99,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
                             // Sends the order to the current orders collection
                             dataHandlingUtils.orderOneItem(mAuth, db, document, getApplicationContext());
                             // Insert document ID into local database
-                            ItemEntry itemEntry = new ItemEntry(document_id, title, description, price);
+                            ItemEntry itemEntry = new ItemEntry(document_id, title, description, price, Constants.ITEM_ENTRY_PROGRESS_NOT_ORDERED);
                             dataHandlingUtils.insertItemRoom(itemEntry, context);
                             finish();
                         }

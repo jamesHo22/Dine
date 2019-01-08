@@ -19,21 +19,24 @@ public class ItemEntry implements BaseModel{
     public String title;
     public String description;
     public int price;
+    public int progress;
 
     @Ignore
-    public ItemEntry(String item_id, String title, String description, int price) {
+    public ItemEntry(String item_id, String title, String description, int price, int progress) {
         this.item_id = item_id;
         this.title = title;
         this.description = description;
         this.price = price;
+        this.progress = progress;
     }
 
-    public ItemEntry(int id, String item_id, String title, String description, int price) {
+    public ItemEntry(int id, String item_id, String title, String description, int price, int progress) {
         this.id = id;
         this.item_id = item_id;
         this.title = title;
         this.description = description;
         this.price = price;
+        this.progress = progress;
     }
     public int getId() {
         return this.id;
@@ -48,6 +51,10 @@ public class ItemEntry implements BaseModel{
     public String getDescription() { return this.description; }
 
     public int getPrice() { return this.price; }
+
+    public int getProgress() { return progress; }
+
+    public void setId(int id) {this.id = id;}
 
     @Override
     public int getViewType() {

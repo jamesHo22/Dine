@@ -1,7 +1,9 @@
 package com.example.dine.dine.firebaseService;
 
+import android.content.Intent;
 import android.util.Log;
 
+import com.example.dine.dine.NotificationActivity;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -22,7 +24,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // manage this apps subscriptions on the server side, send the
         // Instance ID token to your app server.
         // TODO: do something with the token.
-        super.onNewToken(token);
+
+        Log.d(TAG, "onNewToken: " + token);
     }
 
     /**
@@ -62,5 +65,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated.
+        Intent openNotificationActivityIntent = new Intent(this, NotificationActivity.class);
+        startActivity(openNotificationActivityIntent);
     }
 }

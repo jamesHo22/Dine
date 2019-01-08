@@ -7,8 +7,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.dine.dine.Constants;
 import com.example.dine.dine.R;
 import com.example.dine.dine.RoomDb.BaseModel;
 import com.example.dine.dine.RoomDb.ItemEntry;
@@ -158,9 +160,11 @@ public class RoomRecyclerViewAdapter extends RecyclerView.Adapter<RoomRecyclerVi
         private TextView orderSummaryTitleTv;
         private TextView orderSummaryDescriptionTv;
         private TextView orderSummaryPriceTv;
+        private ImageView orderSummaryProgressTv;
 
         public ItemHolder(View itemView) {
             super(itemView);
+            orderSummaryProgressTv = itemView.findViewById(R.id.progress);
             orderSummaryTitleTv = itemView.findViewById(R.id.order_summary_title);
             orderSummaryDescriptionTv = itemView.findViewById(R.id.order_summary_description);
             orderSummaryPriceTv = itemView.findViewById(R.id.order_summary_price);
@@ -174,6 +178,9 @@ public class RoomRecyclerViewAdapter extends RecyclerView.Adapter<RoomRecyclerVi
             DecimalFormat df = new DecimalFormat();
             df.setMaximumFractionDigits(2);
             orderSummaryPriceTv.setText("$" + String.valueOf(df.format(price)));
+            if (object.getProgress() == Constants.ITEM_ENTRY_PROGRESS_COOKING) {
+                orderSummaryProgressTv.setVisibility(View.VISIBLE);
+            }
         }
     }
 

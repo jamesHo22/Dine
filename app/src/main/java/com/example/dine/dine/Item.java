@@ -5,16 +5,18 @@ public class Item {
     private String description;
     private String imageUri;
     private int price;
+    private boolean promo;
 
     public Item(){
         // Empty Constructor needed
     }
 
-    public Item(String title, String description, String imageUri, int price) {
+    public Item(String title, String description, String imageUri, int price, boolean promo) {
         this.title = title;
         this.description = description;
         this.imageUri = imageUri;
         this.price = price;
+        this.promo = promo;
     }
 
     public String getTitle() {
@@ -31,5 +33,9 @@ public class Item {
 
     public int getPrice() {
         return price;
+    }
+
+    public boolean isPromo() {
+        return promo;
     }
 }
