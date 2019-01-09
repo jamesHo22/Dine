@@ -62,16 +62,9 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     // FIXME: Make sure to follow the permissions best practices
 
     private String TAG = this.getClass().getName();
-    private FirebaseAuth mAuth;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     // Add Firestore Reference
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-    /**
-     * The following path is for the updated DB
-     */
-//    private CollectionReference itemRef = db.collection("restaurants_2")
-//            .document("TZs7LD60OiZFHGu6CWz1")
-//            .collection("menu_items");
 
     private FirestoreRecyclerAdapter mFirestoreAdapter;
     protected GeoDataClient mGeoDataClient;
@@ -84,53 +77,8 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     //Location stuff
     private static Location mCurrentLocation;
 
-    private CollectionReference itemRef = db.collection("restaurants")
-            .document("aqvUJjyokpta9KyBFz9U")
-                        .collection("all_items");
-
-//    /**
-//     * This method checks if the document exists and sets the itemRef variable. It also sets up the recyclerview after
-//     * itemRef is assigned a value
-//     * @param db
-//     * @return
-//     */
-//    public void getItemRef(final FirebaseFirestore db) {
-//
-//            Log.d(TAG, "getItemRef: method called");
-//            SharedPreferences prefs = android.preference.PreferenceManager.getDefaultSharedPreferences(this);
-//            final String documentId = prefs.getString(DataHandlingUtils.DOCUMENT_ID, "Id Not Set");
-//            if (!documentId.equals("Id Not Set")) {
-//                // Check if the document exists. If it does, set the itemRef to that document
-//                db.collection("restaurants_2")
-//                        .document(documentId)
-//                        .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-//                        Boolean exists = task.getResult().exists();
-//                        if (exists) {
-//                            itemRef = db.collection("restaurants_2")
-//                                    .document(documentId)
-//                                    .collection("menu_items");
-//
-//                            Log.d(TAG, "onComplete: document exists: " + itemRef + "documentID: " + documentId);
-//                        } else {
-//                            //TODO: send a thing that changes the UI to show that the restaurant hasn't signed up
-//                            itemRef = db.collection("restaurants")
-//                                    .document("aqvUJjyokpta9KyBFz9U")
-//                                    .collection("all_items");
-//                            Log.d(TAG, "onComplete: document no exist");
-//                        }
-//                        setUpRecyclerView();
-//                        mFirestoreAdapter.startListening();
-//                    }
-//                });
-//            } else {
-//                Log.d(TAG, "getItemRef: " + documentId);
-//                itemRef = db.collection("restaurants")
-//                        .document("aqvUJjyokpta9KyBFz9U")
-//                        .collection("all_items");
-//            }
-//    }
+    // This is just the default path. Will show nothing on the RV
+    private CollectionReference itemRef = db.collection(" ");
 
     public void showNoRestaurants() {
         //TODO: modify the UI to display that the selected restaurant is not signed up for Dine
@@ -138,6 +86,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     }
 
     /**
+     * todo: FIRESTORE COST: R = 1, W = 0, D = 0
      * This method takes in a integer ID for an object in the database and sets the path of itemRef to that document_id
      * @param roomLocationId
      */
@@ -220,6 +169,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
 
     /**
      * Implement this method to get information from the bottomSheet
+     * todo: FIRESTORE COST: R = 1, W = 0, D = 0
      */
     @Override
     public void onLocationClicked(String locationId, int roomId) {
@@ -240,15 +190,11 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         setContentView(R.layout.activity_food);
         roomDb = AppDatabase.getInstance(this);
         DataHandlingUtils.makePrefQuery(this, itemRef);
-
-
         // Setup toolbar
         myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
-
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
-
         // Construct a PlaceDetectionClient.
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
 
@@ -331,6 +277,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     /**
      * calls PlacesAPI's getCurrentLocation and returns a list of nearby places. Updates the UI with the more accurate one
      * Temporarily inserts the locations into the ROOM database
+     * todo: FIRESTORE COST: R = 1, W = , D =
      */
     private void getLocation() {
 
@@ -350,6 +297,8 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
                 DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
                 dataHandlingUtils.deleteAllLocationsRoom(getApplicationContext());
                 dataHandlingUtils.getLocations(mCurrentLocation, getApplicationContext());
+                dataHandlingUtils.checkMyReward(mAuth.getUid(), db);
+
 
 //                for (int i = 0; i<likelyPlaces.getCount()/2; i++) {
 //
@@ -405,6 +354,7 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     }
 
     /**
+     * todo: FIRESTORE COST: R = 0:n, W = 0, D = 0
      * sets up the recyclerview.
      */
     private void setUpRecyclerView() {

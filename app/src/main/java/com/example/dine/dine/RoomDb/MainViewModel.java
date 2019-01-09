@@ -36,4 +36,5 @@ public class MainViewModel extends AndroidViewModel {
         return items;
     }
     public LiveData<List<LocationEntry>> getLocations() {return locations;}
+
 }

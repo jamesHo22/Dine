@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -47,6 +48,8 @@ public class DataHandlingUtils {
     }
 
     /**
+     * todo: FIRESTORE COST: R = 0:10, W = 0, D = 0
+     * FIXME: Make a method that calculates the max and min lat, longs and queries Firestore using that to return only restaurants within a predetermined radius.
      * This method downloads all the restaurants on Firestore to a local DB and finds the distances to all of them.
      * @param mCurrentLocation is the Location object to compare the distance to.
      * @param context is the application context
@@ -138,6 +141,7 @@ public class DataHandlingUtils {
     /**
      * Makes a copy of the menu items that was clicked. Attaches timestamp and name of person who ordered it.
      * Sets this new HashMap to the "current_orders" path.
+     * todo: FIRESTORE COST: R = 0, W = 1, D = 0
      * FIXME: instead of using Firestore RTDB, learn how to use FCM.
      * @param mAuth is a firestore Auth that is used to retrieve the display name
      * @param db is the database reference
@@ -165,6 +169,7 @@ public class DataHandlingUtils {
 
     /**
      * Orders an Array of items and puts them in a firestore order document
+     * todo: FIRESTORE COST: R = 1, W = 1:2, D = 0
      * @param mAuth
      * @param db
      * @param context
@@ -189,62 +194,104 @@ public class DataHandlingUtils {
             final String user_id = mAuth.getUid();
 
             Log.d(TAG, "orderItems: ");
-            boolean mExists = checkIfUserExists(user_id, db);
 
-            if (mExists) {
-                Log.d(TAG, "orderItems: user exists. Set order info in their path");
-                CollectionReference itemRef = buildFirestoreUserReference(user_id, db);
-                db.collection(itemRef.getPath()).document()
-                        .set(orderInfo);
-            } else {
-                Log.d(TAG, "orderItems: user did not exist. Create user document and set order info to it.");
-                final Map<String, Object> userInfo = new HashMap<>();
-                userInfo.put("user_created_at", FieldValue.serverTimestamp());
-                db.collection("users_2")
-                        .document(user_id)
-                        .set(userInfo);
-                CollectionReference itemRef = buildFirestoreUserReference(user_id, db);
-                db.collection(itemRef.getPath()).document()
-                        .set(orderInfo);
-            }
+            db.collection("users_2")
+                    .document(user_id)
+                    .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    Boolean exists = task.getResult().exists();
+                    if (exists) {
+                        Log.d(TAG, "orderItems: user exists. Set order info in their path");
+                        CollectionReference itemRef = buildFirestoreUserReference(user_id, db).collection("order_info");
+                        db.collection(itemRef.getPath()).document()
+                                .set(orderInfo);
+                    } else {
+                        Log.d(TAG, "orderItems: user did not exist. Create user document and set order info to it.");
+                        final Map<String, Object> userInfo = new HashMap<>();
+                        userInfo.put("user_created_at", FieldValue.serverTimestamp());
+                        db.collection("users_2")
+                                .document(user_id)
+                                .set(userInfo);
+                        CollectionReference itemRef = buildFirestoreUserReference(user_id, db).collection("order_info");
+                        db.collection(itemRef.getPath()).document()
+                                .set(orderInfo);
+                    }
+                }
+            });
+
         } else {
             Toast.makeText(context, "Your Order Is Empty", Toast.LENGTH_LONG).show();
         }
     }
 
-    /**
-     * Checks if a user document exists
-     */
-    private static boolean userExists;
-    public boolean checkIfUserExists(String user_id, FirebaseFirestore db) {
+    public void checkMyReward(final String user_id, final FirebaseFirestore db) {
         //FIXME: Learn about callback methods to change the userExists variable from within the onComplete method
         // check if document with that user exists
-        db.collection("users_2")
-                .document(user_id)
-                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        DocumentReference userReference = buildFirestoreUserReference(user_id, db);
+        db.document(userReference.getPath()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                Boolean exists = task.getResult().exists();
-                userExists = exists;
+                if(task.getResult().exists()) {
+                    try{
+                        // get the number of points and use getMyReward() method to set appropriate award in user's collection.
+                        long numPoints = task.getResult().getLong("points");
+                        getMyReward(numPoints, user_id, db);
+                        Log.d(TAG, "onComplete: num points: " + numPoints);
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "onComplete: could not retrieve the number of points", e);
+                    }
+                } else {
+                    Log.d(TAG, "onComplete: user with " + user_id + " does not exist.");
+                }
             }
         });
-        return userExists;
     }
 
-    private static boolean RestaurantExists;
-    public boolean checkIfRestaurantExists(String restaurant_id, FirebaseFirestore db) {
-        //FIXME: Learn about callback methods to change the userExists variable from within the onComplete method
-        // check if document with that user exists
-        db.collection("restaurants_2")
-                .document(restaurant_id)
-                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                Boolean exists = task.getResult().exists();
-                RestaurantExists = exists;
-            }
-        });
-        return RestaurantExists;
+    /**
+     * getMyReward calls Firestore to move a reward from the "reward" collection to the "rewards" collection under a user document
+     * method evaluates the number of points to determine which rank the user is in and what collection to read from.
+     * todo: FIRESTORE COST: R = 1, W = 1, D = 0
+     * @param user_id the google ID of the user
+     * @param db instance of a Firestore Database
+     */
+    public static DocumentSnapshot discountDocumentSnapshot;
+    public void getMyReward(final long mNumPoints, final String user_id, final FirebaseFirestore db) {
+        // Checks if you have made 10 orders since your last reward
+        Log.d(TAG, "getMyReward: " + mNumPoints);
+        if (mNumPoints==1000) {
+            // Retrieve a random discount from Firestore
+            final CollectionReference rewardsRef = db.collection("rewards");
+            rewardsRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    int Min = 0;
+                    int Max = task.getResult().getDocuments().size();
+                    int randomNum = Min + (int)(Math.random() * (Max - Min));
+                    discountDocumentSnapshot = task.getResult().getDocuments().get(randomNum);
+                    String reward_id = discountDocumentSnapshot.getId();
+                    if (discountDocumentSnapshot != null) {
+
+                        Log.d(TAG, "onComplete: " + discountDocumentSnapshot.get("title") + " randomNum: " + randomNum);
+                        // create a reference to the "rewards" collection under the user's path
+                        CollectionReference itemRef = buildFirestoreUserReference(user_id, db).collection("rewards");
+                        // get a DocumentReference to the reward document
+                        DocumentReference rewardReference = rewardsRef.document(reward_id);
+                        // save the DocumentReference to the user's "rewards" collection as a new document.
+                        // set the validity of that reward to true.
+                        Map<String, Object> discountInfo = new HashMap<>();
+                        discountInfo.put("validity", true);
+                        discountInfo.put("reward_ref", rewardReference);
+                        db.collection(itemRef.getPath()).document().set(discountInfo);
+                    }
+                }
+            });
+            Log.d(TAG, "onComplete: you have a discount");
+        } else {
+            double i = 10 - mNumPoints%10;
+            Log.d(TAG, "onComplete: you have " + i + " more orders until your next discount");
+        }
     }
 
     /**
@@ -380,10 +427,9 @@ public class DataHandlingUtils {
     /**
      * Make a method that takes in the google userId that directs the user to their account to write data.
      */
-    public CollectionReference buildFirestoreUserReference(String user_id, FirebaseFirestore db){
-        CollectionReference itemRef = db.collection("users_2")
-                .document(user_id)
-                .collection("order_info");
+    public DocumentReference buildFirestoreUserReference(String user_id, FirebaseFirestore db){
+        DocumentReference itemRef = db.collection("users_2")
+                .document(user_id);
         return itemRef;
     }
     /**
