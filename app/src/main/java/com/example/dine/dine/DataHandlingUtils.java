@@ -180,6 +180,7 @@ public class DataHandlingUtils {
                            Context context,
                            ArrayList idArray) {
         // if there is something in the order array, begin fireStore transaction
+        final String user_id = mAuth.getUid();
         if (!idArray.isEmpty()) {
             Toast.makeText(context, "You ordered " + String.valueOf(idArray.size()) + " items", Toast.LENGTH_LONG).show();
             FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -190,8 +191,6 @@ public class DataHandlingUtils {
             orderInfo.put("order_time", FieldValue.serverTimestamp());
             orderInfo.put("menu_item_ids", idArray);
             Log.d(TAG, "orderItems: " + orderInfo.get("menu_item_ids"));
-
-            final String user_id = mAuth.getUid();
 
             Log.d(TAG, "orderItems: ");
 
@@ -220,13 +219,39 @@ public class DataHandlingUtils {
                 }
             });
 
+            //TODO: add points to the points field
+            // check if document with that user exists
+            DocumentReference userReference = buildFirestoreUserReference(user_id, db);
+            db.document(userReference.getPath()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if(task.getResult().exists()) {
+                        try{
+                            // get the number of points and use getMyReward() method to set appropriate award in user's collection.
+                            long numPoints = task.getResult().getLong("points");
+                            long newPoints = numPoints + 100;
+                            DocumentReference itemRef = buildFirestoreUserReference(user_id, db);
+                            db.document((itemRef.getPath())).update("points", newPoints);
+                            Log.d(TAG, "onComplete: 100 points added");
+                        } catch (NullPointerException e) {
+                            e.printStackTrace();
+                            Log.e(TAG, "onComplete: could not update the number of points", e);
+                        }
+                    } else {
+                        Log.d(TAG, "onComplete: user with " + user_id + " does not exist.");
+                    }
+                }
+            });
+
         } else {
             Toast.makeText(context, "Your Order Is Empty", Toast.LENGTH_LONG).show();
         }
+
     }
 
     public void checkMyReward(final String user_id, final FirebaseFirestore db) {
         //FIXME: Learn about callback methods to change the userExists variable from within the onComplete method
+        //TODO: get the threshold from rewards field
         // check if document with that user exists
         DocumentReference userReference = buildFirestoreUserReference(user_id, db);
         db.document(userReference.getPath()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -258,8 +283,10 @@ public class DataHandlingUtils {
      */
     public static DocumentSnapshot discountDocumentSnapshot;
     public void getMyReward(final long mNumPoints, final String user_id, final FirebaseFirestore db) {
-        // Checks if you have made 10 orders since your last reward
+        // 1. Check how many points the person has.
         Log.d(TAG, "getMyReward: " + mNumPoints);
+        // 2. for a n number of points, retrieve the reward from the right rank
+        // 3. delete n number of points
         if (mNumPoints==1000) {
             // Retrieve a random discount from Firestore
             final CollectionReference rewardsRef = db.collection("rewards");

@@ -12,10 +12,10 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_restaurant_menu_white_24dp"/>
 
-    <!-- Settings, should always be in the overflow -->
+    <!--&lt;!&ndash; Settings, should always be in the overflow &ndash;&gt;-->
 
-    <item android:id="@+id/action_settings"
-        android:title="@string/settings"
-        app:showAsAction="never"/>
+    <!--<item android:id="@+id/action_settings"-->
+        <!--android:title="@string/settings"-->
+        <!--app:showAsAction="never"/>-->
 
 </menu>

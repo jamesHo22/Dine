@@ -49,14 +49,7 @@ public class SignInActivity extends AppCompatActivity {
         // Get a reference to the sign in button
         signInButton = findViewById(R.id.sign_in);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
-        // Get reference to signout button
-        signOutButton = findViewById(R.id.sign_out);
-        signOutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                signOut();
-            }
-        });
+
         // Set an OnClickListener to start the sign in flow
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,6 +90,8 @@ public class SignInActivity extends AppCompatActivity {
         if (currentUser != null) {
             //TODO: Display the main page
             Log.v(TAG, "User signed in " + currentUser.toString());
+            Intent hasUserIntent = new Intent(this, FoodActivity.class);
+            startActivity(hasUserIntent);
             getToken(currentUser);
         } else {
             Log.v(TAG, "No user signed in");
@@ -143,7 +138,7 @@ public class SignInActivity extends AppCompatActivity {
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
-                updateUI(account);
+//                updateUI(account);
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
@@ -155,12 +150,12 @@ public class SignInActivity extends AppCompatActivity {
     private void updateUI(GoogleSignInAccount account) {
         if (account != null) {
             Intent intent = new Intent(getApplicationContext(), FoodActivity.class);
-            intent.putExtra("accountName", account.getDisplayName());
+//            intent.putExtra("accountName", account.getDisplayName());
             startActivity(intent);
         }
     }
 
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+    private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
         /**
          * After a user successfully signs in, get an ID token from the GoogleSignInAccount object,
          * exchange it for a Firebase credential, and authenticate with Firebase using the Firebase credential:
@@ -177,7 +172,7 @@ public class SignInActivity extends AppCompatActivity {
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(getApplicationContext(), "Signed in as " + user.getDisplayName(), Toast.LENGTH_LONG).show();
-
+                            updateUI(acct);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());

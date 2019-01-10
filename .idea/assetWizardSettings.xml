@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/Applications/Android%20Studio.app/Contents/plugins/android/lib/android.jar!/images/material_design_icons/av/ic_fiber_manual_record_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/Applications/Android%20Studio.app/Contents/plugins/android/lib/android.jar!/images/material_design_icons/navigation/ic_menu_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -34,8 +34,8 @@
                         <option name="values">
                           <map>
                             <entry key="autoMirrored" value="true" />
-                            <entry key="color" value="ffe100" />
-                            <entry key="outputName" value="ic_fiber_manual_record_black_24dp" />
+                            <entry key="color" value="ffffff" />
+                            <entry key="outputName" value="ic_menu_black_24dp" />
                             <entry key="overrideSize" value="true" />
                             <entry key="sourceFile" value="$USER_HOME$/Desktop/app/black/res/drawable/buy_with_googlepay_button_content.xml" />
                           </map>

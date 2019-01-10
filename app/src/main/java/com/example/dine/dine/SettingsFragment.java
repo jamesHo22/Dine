@@ -16,5 +16,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         // associate fragment with this fragment the preferences.xml.
         // Sets the shared preference with value from fragment
         setPreferencesFromResource(R.xml.preferences, rootKey);
+
+
     }
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/drawer_preferences"
+            android:title="@string/preferences"/>
+        <item
+            android:id="@+id/drawer_rewards"
+            android:title="@string/rewards"/>
+        <item
+            android:id="@+id/drawer_sign_out"
+            android:title="@string/sign_out" />
+    </group>
+</menu>

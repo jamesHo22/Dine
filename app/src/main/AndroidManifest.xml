@@ -41,7 +41,8 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/PreferenceTheme"
+            android:parentActivityName=".FoodActivity" />
         <activity
             android:name=".ItemDetailsActivity"
             android:theme="@style/AppTheme" />
