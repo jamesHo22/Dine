@@ -202,7 +202,6 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
-
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
         // Construct a PlaceDetectionClient.
@@ -489,7 +488,6 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         // FIXME: only check preference if they changed
         DataHandlingUtils.makePrefQuery(this, itemRef);
         setUpRecyclerView();
-        //mFirestoreAdapter.startListening();
     }
 
     @Override
@@ -500,6 +498,11 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
     @Override
     protected void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         mFirestoreAdapter.stopListening();
     }
 }
