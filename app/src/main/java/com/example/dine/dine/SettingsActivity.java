@@ -1,7 +1,9 @@
 package com.example.dine.dine;
 
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -15,9 +17,19 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ActionBar myActionBar = getSupportActionBar();
+        myActionBar.setDisplayHomeAsUpEnabled(true);
+
+
         // display fragment as main view
         getSupportFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        onBackPressed();
+        return true;
     }
 }

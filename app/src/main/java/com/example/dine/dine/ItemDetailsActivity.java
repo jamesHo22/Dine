@@ -27,12 +27,12 @@ import com.squareup.picasso.Picasso;
 public class ItemDetailsActivity extends AppCompatActivity {
 
     private final static String TAG = ItemDetailsActivity.class.getName();
-    final static String INTENT_EXTRA_DOCUMENT_ID = "document_id";
-    final static String INTENT_EXTRA_KEY_DETAILED_TITLE = "detailed_title";
-    final static String INTENT_EXTRA_KEY_DETAILED_DESCRIPTION = "detailed_description";
-    final static String INTENT_EXTRA_KEY_DETAILED_IMAGE_URI = "detailed_image_uri";
-    final static String INTENT_EXTRA_KEY_DETAILED_PRICE = "detailed_price";
-    final static String INTENT_EXTRA_KEY_LOCATION_ID = "location_id";
+    final public static String INTENT_EXTRA_DOCUMENT_ID = "document_id";
+    final public static String INTENT_EXTRA_KEY_DETAILED_TITLE = "detailed_title";
+    final public static String INTENT_EXTRA_KEY_DETAILED_DESCRIPTION = "detailed_description";
+    final public static String INTENT_EXTRA_KEY_DETAILED_IMAGE_URI = "detailed_image_uri";
+    final public static String INTENT_EXTRA_KEY_DETAILED_PRICE = "detailed_price";
+    final public static String INTENT_EXTRA_KEY_LOCATION_ID = "location_id";
 
     // create member variables
     private String mTitle;

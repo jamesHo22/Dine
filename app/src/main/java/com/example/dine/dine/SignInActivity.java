@@ -152,6 +152,7 @@ public class SignInActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), FoodActivity.class);
 //            intent.putExtra("accountName", account.getDisplayName());
             startActivity(intent);
+            finish();
         }
     }
 
@@ -183,5 +184,10 @@ public class SignInActivity extends AppCompatActivity {
                         // ...
                     }
                 });
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }

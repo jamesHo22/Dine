@@ -10,7 +10,7 @@
         android:id="@+id/order_summary_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorLightPink"
+        android:background="@color/colorLightRed"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
@@ -169,7 +169,7 @@
                 android:padding="20dp"
                 app:cardCornerRadius="4dp"
                 android:layout_margin="8dp"
-                app:cardBackgroundColor="@color/colorLightPink">
+                app:cardBackgroundColor="@color/colorLightRed">
 
                 <TextView
                     android:id="@+id/place_order"

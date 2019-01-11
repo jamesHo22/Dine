@@ -249,6 +249,12 @@ public class DataHandlingUtils {
 
     }
 
+    /**
+     * Checks the user_id then passes the number of points into the getMyReward() method.
+     * todo: FIRESTORE COST: R = 2, W = 1, D = 0
+     * @param user_id
+     * @param db
+     */
     public void checkMyReward(final String user_id, final FirebaseFirestore db) {
         //FIXME: Learn about callback methods to change the userExists variable from within the onComplete method
         //TODO: get the threshold from rewards field

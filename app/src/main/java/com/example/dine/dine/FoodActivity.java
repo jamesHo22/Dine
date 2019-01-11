@@ -15,9 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,7 +34,6 @@ import com.example.dine.dine.RoomDb.LocationEntry;
 import com.example.dine.dine.uiDrawers.FirestoreItemAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
@@ -50,7 +47,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 
-public class FoodActivity extends AppCompatActivity implements LocationListener,
+public class FoodActivity extends AppCompatActivity implements
         BottomSheetDialogue.BottomSheetListener,
         LocationUtils.LocationUpdateListener {
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 25;
@@ -159,9 +156,21 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
                 bottomSheetDialogue.show(getSupportFragmentManager(), "example_bottom_sheet");
                 return true;
 
-            case android.R.id.home:
-                Log.d(TAG, "onOptionsItemSelected: clicked");
-                mDrawerLayout.openDrawer(GravityCompat.START);
+            case R.id.action_preferences:
+                Intent preferenceIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(preferenceIntent);
+                return true;
+
+            case R.id.action_rewards:
+                Intent rewardsIntent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(rewardsIntent);
+                return true;
+
+            case R.id.action_sign_out:
+                signOut();
+                Intent signOutIntent = new Intent(getApplicationContext(), SignInActivity.class);
+                startActivity(signOutIntent);
+                finish();
                 return true;
 
             default:
@@ -199,38 +208,10 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         // Setup toolbar
         myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
         // Construct a PlaceDetectionClient.
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
-
-        mDrawerLayout = findViewById(R.id.drawer_layout);
-        mNavView = findViewById(R.id.nav_view);
-        mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.drawer_preferences:
-                        // Open settings activity
-                        Intent preferenceIntent = new Intent(getApplicationContext(), SettingsActivity.class);
-                        startActivity(preferenceIntent);
-                        mDrawerLayout.closeDrawer(GravityCompat.START);
-                        break;
-
-                    case R.id.drawer_sign_out:
-                        signOut();
-                        Intent signOutIntent = new Intent(getApplicationContext(), SignInActivity.class);
-                        startActivity(signOutIntent);
-                        mDrawerLayout.closeDrawer(GravityCompat.START);
-                        break;
-                }
-                return false;
-            }
-        });
 
         FloatingActionButton mFloatingActionButton;
         mFloatingActionButton = findViewById(R.id.fab);
@@ -390,15 +371,15 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         });
     }
 
-    /**
-     * Does something when the users location changes
-     * @param location
-     */
-    @Override
-    public void onLocationChanged(Location location) {
-        Log.d(TAG, "onLocationChanged: location has changed");
-        Log.d(TAG, "onLocationChanged: Lat: " + location.getLatitude() + " Long: " + location.getLongitude());
-    }
+//    /**
+//     * Does something when the users location changes
+//     * @param location
+//     */
+//    @Override
+//    public void onLocationChanged(Location location) {
+//        Log.d(TAG, "onLocationChanged: location has changed");
+//        Log.d(TAG, "onLocationChanged: Lat: " + location.getLatitude() + " Long: " + location.getLongitude());
+//    }
 
     /**
      * todo: FIRESTORE COST: R = 0:n, W = 0, D = 0
@@ -411,10 +392,11 @@ public class FoodActivity extends AppCompatActivity implements LocationListener,
         FirestoreRecyclerOptions<Item> options =  new FirestoreRecyclerOptions.Builder<Item>()
                 .setQuery(query, Item.class)
                 .build();
-        mFirestoreAdapter = new FirestoreItemAdapter(options, FirestoreItemAdapter.MENU_ORDERING_STYLE);
+        mFirestoreAdapter = new FirestoreItemAdapter(options);
         RecyclerView recyclerView = findViewById(R.id.rv_show_menu_items);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setAdapter(mFirestoreAdapter);
         mFirestoreAdapter.startListening();
 

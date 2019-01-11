@@ -14,8 +14,16 @@
 
     <!--&lt;!&ndash; Settings, should always be in the overflow &ndash;&gt;-->
 
-    <!--<item android:id="@+id/action_settings"-->
-        <!--android:title="@string/settings"-->
-        <!--app:showAsAction="never"/>-->
+    <item android:id="@+id/action_preferences"
+        android:title="@string/preferences"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_rewards"
+        android:title="@string/rewards"/>
+
+    <item android:id="@+id/action_sign_out"
+        android:title="@string/sign_out"
+        app:showAsAction="never"/>
 
 </menu>
