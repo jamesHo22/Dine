@@ -21,9 +21,7 @@ import com.squareup.picasso.Picasso;
 public class FirestoreItemAdapter extends FirestoreRecyclerAdapter<Item, FirestoreItemAdapter.FirestoreItemHolder> {
 
     private onItemClickListener mListener;
-    private int mViewStyle;
-    public static final int MENU_ORDERING_STYLE = 1;
-    public static final int ORDER_SUMMARY_STYLE = 2;
+
     private final static String TAG = FirestoreItemAdapter.class.getSimpleName();
 
     public FirestoreItemAdapter(@NonNull FirestoreRecyclerOptions<Item> options) {
@@ -69,7 +67,6 @@ public class FirestoreItemAdapter extends FirestoreRecyclerAdapter<Item, Firesto
     public FirestoreItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View menuOrderingStyle = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_view, parent, false);
-        Log.d(TAG, "onCreateViewHolder: MENU_ORDERING_STYLE");
         return new FirestoreItemHolder(menuOrderingStyle);
     }
 

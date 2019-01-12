@@ -57,7 +57,7 @@ public class LocationUtils {
             }
         };
 
-        // Request a new location every two seconds
+        // Request a new location when user moves 10 meters
         mLocationRequest = new LocationRequest();
         mLocationRequest
                 .setSmallestDisplacement(10)

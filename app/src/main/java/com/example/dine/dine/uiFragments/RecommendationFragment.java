@@ -6,14 +6,13 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -46,6 +45,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.Source;
 
 public class RecommendationFragment extends android.support.v4.app.Fragment implements LocationUtils.LocationUpdateListener {
     public RecommendationFragment(){}
@@ -53,7 +53,6 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
     /**
      * Variables
      */
-    private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 25;
     private String TAG = this.getClass().getName();
     private FirebaseAuth mAuth;
     // Add Firestore Reference
@@ -64,8 +63,7 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
     private AppDatabase roomDb;
     private static String mRestaurantDocumentId;
     public LifecycleOwner lifecycleOwner = this;
-    private DrawerLayout mDrawerLayout;
-    private NavigationView mNavView;
+    private Source source;
     //Location stuff
     private static Location mCurrentLocation;
     // This is just the default path. Will show nothing on the RV
@@ -102,54 +100,60 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Change data source depending on if the fragment had been recreated
+        if (savedInstanceState==null) {
+            // if bundle is null, it means fragment is created for first time. Thus, read from firestore
+            //source = Source.DEFAULT;
+            Log.d(TAG, "onCreate: bundle is null");
+
+        } else {
+            // if it is not null, it means there has been a configuration change and the fragment has been created before.
+            // Thus, read from the cache
+            //source = Source.CACHE;
+            Log.d(TAG, "onCreate: bundle not null");
+        }
 
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        //Check for network availability
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 
-        rootView = inflater.inflate(R.layout.activity_food, container, false);
-        roomDb = AppDatabase.getInstance(getContext());
-        DataHandlingUtils.makePrefQuery(getContext(), itemRef);
-        mAuth = FirebaseAuth.getInstance();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            // fetch data
+            // Construct a GeoDataClient.
+            mGeoDataClient = Places.getGeoDataClient(getContext(), null);
+            // Construct a PlaceDetectionClient.
+            mPlaceDetectionClient = Places.getPlaceDetectionClient(getContext(), null);
+            roomDb = AppDatabase.getInstance(getContext());
+            DataHandlingUtils.makePrefQuery(getContext(), itemRef);
+            mAuth = FirebaseAuth.getInstance();
 
-        // Construct a GeoDataClient.
-        mGeoDataClient = Places.getGeoDataClient(getContext(), null);
-        // Construct a PlaceDetectionClient.
-        mPlaceDetectionClient = Places.getPlaceDetectionClient(getContext(), null);
-
-        // Get bundle data. Contains new locationId. Change location
-        if (getArguments()!=null){
-            // if the locations permission was granted, proceed to get the current location.
-            // If not, use the location specified by the database.
-            if (getArguments().getInt(Constants.TAG_ACCESS_FINE_LOCATION_PERMISSION_GRANTED)
-                    == Constants.CODE_ACCESS_FINE_LOCATION_PERMISSION_GRANTED) {
-                getLocation();
-            } else {
-                int roomId = getArguments().getInt(Constants.ON_LOCATION_CLICKED_ROOM_ID);
-                setItemRef(roomId);
-                Log.d(TAG, "onCreateView: " + itemRef.getPath());
+            // Get bundle data. Contains new locationId. Change location
+            if (getArguments()!=null){
+                Log.d(TAG, "onCreateView: getArguments is not null");
+                // if the locations permission was granted and there is no saved instance, proceed to get the current location.
+                // If not, use the location specified by the database.
+                if (getArguments().getBoolean(Constants.TAG_ACCESS_FINE_LOCATION_PERMISSION_GRANTED)) {
+                    getLocation();
+                    Log.d(TAG, "onCreateView: permission granted");
+                } else {
+                    Log.d(TAG, "onCreateView: fragment refreshed");
+                    int roomId = getArguments().getInt(Constants.ON_LOCATION_CLICKED_ROOM_ID);
+                    setItemRef(roomId);
+                }
             }
+        } else {
+            // display error
+            DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
+            dataHandlingUtils.deleteAllLocationsRoom(getContext());
+
         }
 
-//        // Check for or request for permissions
-//        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            // Permission is not granted
-//            // Should we show an explanation?
-//            Log.d(TAG, "onCreate: permission not granted");
-//
-//            // No explanation needed; request the permission
-//            ActivityCompat.requestPermissions(getActivity(),
-//                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-//                    MY_PERMISSIONS_ACCESS_FINE_LOCATION);
-//            Log.d(TAG, "onCreate: permission requested");
-//
-//        } else {
-//            // Permission already granted, get location
-//            Log.d(TAG, "onCreate: permission already granted");
-//            getLocation();
-//        }
+        rootView = inflater.inflate(R.layout.activity_food, container, false);
 
         FloatingActionButton mFloatingActionButton;
         mFloatingActionButton = rootView.findViewById(R.id.fab);
@@ -164,30 +168,13 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
         return rootView;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    getLocation();
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-            }
-        }
-    }
 
     @Override
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart: woot");
         DataHandlingUtils.makePrefQuery(getContext(), itemRef);
-        //setUpRecyclerView(rootView);
+        setUpRecyclerView(rootView);
     }
 
     @Override
@@ -196,8 +183,9 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
         mFirestoreAdapter.stopListening();
     }
 
+
     /**
-     * Non-Android Callbacks
+     * Non-LifeCycle Callbacks
      */
 
     // essentially a callback from LocationUtils
@@ -233,7 +221,7 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
                         // Document ID exists, check Firestore
                         db.collection("restaurants_2")
                                 .document(documentId)
-                                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                .get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                             @Override
                             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                                 Boolean exists = task.getResult().exists();
@@ -278,10 +266,14 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
         mFirestoreAdapter = new FirestoreItemAdapter(options);
         RecyclerView recyclerView = rootView.findViewById(R.id.rv_show_menu_items);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setAdapter(mFirestoreAdapter);
         mFirestoreAdapter.startListening();
+
+        int firstItemPosition = layoutManager.findFirstVisibleItemPosition();
+        Log.d(TAG, "setUpRecyclerView: " + firstItemPosition);
 
 
         // Set itemtouch helper to recycler view
@@ -351,7 +343,7 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
      * Temporarily inserts the locations into the ROOM database
      * todo: FIRESTORE COST: R = 1, W = , D =
      */
-    private void getLocation() {
+    public void getLocation() {
 
         //TODO: once the nearest place has been determined, set the sharedPreference string to that location's ID
         // This sets up an update that gets a new location every time the user moves more than a specified distance

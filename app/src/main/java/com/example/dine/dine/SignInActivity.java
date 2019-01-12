@@ -90,7 +90,7 @@ public class SignInActivity extends AppCompatActivity {
         if (currentUser != null) {
             //TODO: Display the main page
             Log.v(TAG, "User signed in " + currentUser.toString());
-            Intent hasUserIntent = new Intent(this, FoodActivity.class);
+            Intent hasUserIntent = new Intent(this, MainActivity.class);
             startActivity(hasUserIntent);
             getToken(currentUser);
         } else {
@@ -149,7 +149,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private void updateUI(GoogleSignInAccount account) {
         if (account != null) {
-            Intent intent = new Intent(getApplicationContext(), FoodActivity.class);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 //            intent.putExtra("accountName", account.getDisplayName());
             startActivity(intent);
             finish();
