@@ -216,6 +216,7 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
     /**
      * Non-LifeCycle Callbacks
      */
+
     // essentially a callback from LocationUtils
     @Override
     public void onLocationUpdate(Location location) {

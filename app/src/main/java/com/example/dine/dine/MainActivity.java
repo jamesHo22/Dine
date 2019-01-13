@@ -120,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
 //        fragmentTransaction.commitAllowingStateLoss();
 //        getSupportFragmentManager().executePendingTransactions();
 
+        Log.d(TAG, "switchToRecommendationFrag: switched!");
         MenuFragment menuFragment = (MenuFragment) getSupportFragmentManager().findFragmentByTag(TAG_MENU_FRAGMENT);
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.hide(menuFragment);
@@ -130,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
 
     private void switchToMenuFrag() {
 
+        Log.d(TAG, "switchToMenuFrag: switched!");
 //        MenuFragment menuFragment = (MenuFragment) getSupportFragmentManager().findFragmentByTag(TAG_MENU_FRAGMENT);
 //        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 //        fragmentTransaction.detach(getSupportFragmentManager().findFragmentByTag(TAG_RECOMMENDATION_FRAGMENT));
@@ -147,33 +149,6 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    Log.d(TAG, "onRequestPermissionResult: permission already granted");
-                    Bundle bundle = new Bundle();
-                    bundle.putBoolean(Constants.TAG_ACCESS_FINE_LOCATION_PERMISSION_GRANTED, true);
-                    RecommendationFragment recommendationFragment = new RecommendationFragment();
-                    //recommendationFragment.setArguments(bundle);
-                    // Refresh the fragment
-                    getSupportFragmentManager().beginTransaction().add(R.id.test_container, recommendationFragment, TAG_RECOMMENDATION_FRAGMENT).commit();
-                    switchToRecommendationFrag();
-
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    Log.d(TAG, "onRequestPermissionResult: permission declined");
-                }
-            }
-        }
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
     }
@@ -184,14 +159,30 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
         Bundle bundle = new Bundle();
         bundle.putString(Constants.ON_LOCATION_CLICKED_LOCATION_ID, locationId);
         bundle.putInt(Constants.ON_LOCATION_CLICKED_ROOM_ID, roomId);
-        // set Fragmentclass Arguments
-//        RecommendationFragment recommendationFragment = new RecommendationFragment();
-//        recommendationFragment.setArguments(bundle);
-        // Refresh the fragment
-        //fragmentManager.beginTransaction().replace(R.id.test_container, recommendationFragment, TAG_RECOMMENDATION_FRAGMENT).commit();
         RecommendationFragment recommendationFragment1 = (RecommendationFragment) fragmentManager.findFragmentByTag(TAG_RECOMMENDATION_FRAGMENT);
         recommendationFragment1.setArguments(bundle);
         recommendationFragment1.setItemRef(roomId);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    Log.d(TAG, "onRequestPermissionResult: permission already granted");
+                    RecommendationFragment recommendationFragment = (RecommendationFragment) fragmentManager.findFragmentByTag(TAG_RECOMMENDATION_FRAGMENT);
+                    recommendationFragment.getLocation();
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Log.d(TAG, "onRequestPermissionResult: permission declined");
+                }
+            }
+        }
     }
 
     /**
