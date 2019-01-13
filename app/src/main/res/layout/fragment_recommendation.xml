@@ -8,17 +8,9 @@
     tools:context=".FoodActivity">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_show_menu_items"
+        android:id="@+id/rv_show_recommended_items"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        ></android.support.v7.widget.RecyclerView>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="16dp"
-        app:srcCompat="@drawable/ic_shopping_cart_black_24dp" />
+        />
 
 </android.support.design.widget.CoordinatorLayout>

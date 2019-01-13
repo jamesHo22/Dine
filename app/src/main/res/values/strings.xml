@@ -16,4 +16,6 @@
     <string name="rewards">Rewards</string>
     <string name="rewards_title">Dine Rewards</string>
     <string name="num_points">%1$d/</string>
+    <string name="tab_recommendations">Recommendations</string>
+    <string name="tab_menu">Menu</string>
 </resources>

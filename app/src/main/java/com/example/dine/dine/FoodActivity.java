@@ -393,7 +393,7 @@ public class FoodActivity extends AppCompatActivity implements
                 .setQuery(query, Item.class)
                 .build();
         mFirestoreAdapter = new FirestoreItemAdapter(options);
-        RecyclerView recyclerView = findViewById(R.id.rv_show_menu_items);
+        RecyclerView recyclerView = findViewById(R.id.rv_show_recommended_items);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setNestedScrollingEnabled(false);

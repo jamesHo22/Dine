@@ -3,8 +3,8 @@ package com.example.dine.dine;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -15,9 +15,9 @@ import android.widget.Toast;
 
 import com.example.dine.dine.uiFragments.MenuFragment;
 import com.example.dine.dine.uiFragments.RecommendationFragment;
+import com.example.dine.dine.uiFragments.ViewPagerFragmentAdapter;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.Places;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity implements BottomSheetDialogue.BottomSheetListener, RecommendationFragment.MainActivityInterface {
@@ -28,20 +28,23 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
      */
     private final String TAG = this.getClass().getSimpleName();
     private Toolbar myToolbar;
-    private static android.support.v4.app.FragmentManager fragmentManager;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 25;
     private static final String TAG_RECOMMENDATION_FRAGMENT= "tag_recommendation_fragment";
     private static final String TAG_MENU_FRAGMENT= "tag_menu_fragment";
     private static boolean menuIconClicked = true;
+    private static android.support.v4.app.FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
 
-    private ViewPager mPager;
-    private PagerAdapter mPagerAdapter;
+    //Viewpager and tablayout
+    private ViewPager viewPager;
+    ViewPagerFragmentAdapter pagerAdapter;
+    private TabLayout tabLayout;
+
 
     /**
-     * Interfaces
+     * Lifecycle Callbacks
      */
 
     @Override
@@ -51,50 +54,30 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
         // Setup toolbar
         myToolbar = findViewById(R.id.toolbar_main);
         setSupportActionBar(myToolbar);
-        // Construct a GeoDataClient.
-        mGeoDataClient = Places.getGeoDataClient(this, null);
-        // Construct a PlaceDetectionClient.
-        mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
 
-//        TODO: Instantiate a ViewPager and a PagerAdapter.
-//        mPager = (ViewPager) findViewById(R.id.view_pager);
-//        mPagerAdapter = new ViewPagerFragmentAdapter(getSupportFragmentManager());
-//        mPager.setAdapter(mPagerAdapter);
         fragmentManager = getSupportFragmentManager();
         fragmentTransaction = fragmentManager.beginTransaction();
-        // Create fragment
-        RecommendationFragment recommendationFragment = new RecommendationFragment();
-        MenuFragment menuFragment = new MenuFragment();
 
-        // create fragment
-        if (savedInstanceState==null) {
-            // Activity created for first time
-            // Create both fragments.
-            Log.d(TAG, "onCreate: savedInstanceState is null");
-            fragmentTransaction.add(R.id.test_container, recommendationFragment, TAG_RECOMMENDATION_FRAGMENT);
-            fragmentTransaction.add(R.id.test_container, menuFragment, TAG_MENU_FRAGMENT);
-            fragmentTransaction.commit();
+        // test out view pager
+        viewPager = (ViewPager) findViewById(R.id.view_pager);
+        pagerAdapter = new ViewPagerFragmentAdapter(this, getSupportFragmentManager());
+        viewPager.setAdapter(pagerAdapter);
+        tabLayout = findViewById(R.id.tab_layout);
+        tabLayout.setupWithViewPager(viewPager);
 
-//            // Check for or request for permissions
-//            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//                // Permission is not granted
-//                // Should we show an explanation?
-//                Log.d(TAG, "onCreate: permission not granted");
+//        // Create fragment
+//        RecommendationFragment recommendationFragment = new RecommendationFragment();
+//        MenuFragment menuFragment = new MenuFragment();
 //
-//                // No explanation needed; request the permission
-//                ActivityCompat.requestPermissions(this,
-//                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-//                        MY_PERMISSIONS_ACCESS_FINE_LOCATION);
-//                Log.d(TAG, "onCreate: permission requested");
-//
-//            } else {
-//                // Permission already granted, get location
-//                Log.d(TAG, "onCreate: permission already granted");
-//                Bundle bundle = new Bundle();
-//                bundle.putBoolean(Constants.TAG_ACCESS_FINE_LOCATION_PERMISSION_GRANTED, true);
-//                recommendationFragment.setArguments(bundle);
-//            }
-        }
+//        // create fragment
+//        if (savedInstanceState==null) {
+//            // Activity created for first time
+//            // Create both fragments.
+//            Log.d(TAG, "onCreate: savedInstanceState is null");
+//            fragmentTransaction.add(R.id.test_container, recommendationFragment, TAG_RECOMMENDATION_FRAGMENT);
+//            fragmentTransaction.add(R.id.test_container, menuFragment, TAG_MENU_FRAGMENT);
+//            fragmentTransaction.commit();
+//        }
     }
 
     @Override
@@ -103,24 +86,19 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
         Log.d(TAG, "onResume: woot " + menuIconClicked);
         if (menuIconClicked) {
             // No press
-           switchToRecommendationFrag();
+           //switchToRecommendationFrag();
 
         } else {
             // Odd number press
-            switchToMenuFrag();
+            //switchToMenuFrag();
         }
     }
 
-    private void switchToRecommendationFrag() {
-//        RecommendationFragment recommendationFragment = (RecommendationFragment) getSupportFragmentManager().findFragmentByTag(TAG_RECOMMENDATION_FRAGMENT);
-//        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-//        fragmentTransaction.detach(getSupportFragmentManager().findFragmentByTag(TAG_MENU_FRAGMENT));
-//        fragmentTransaction.attach(recommendationFragment);
-//        fragmentTransaction.addToBackStack(null);
-//        fragmentTransaction.commitAllowingStateLoss();
-//        getSupportFragmentManager().executePendingTransactions();
+    /**
+     * Methods
+     */
 
-        Log.d(TAG, "switchToRecommendationFrag: switched!");
+    private void switchToRecommendationFrag() {
         MenuFragment menuFragment = (MenuFragment) getSupportFragmentManager().findFragmentByTag(TAG_MENU_FRAGMENT);
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.hide(menuFragment);
@@ -130,16 +108,6 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
     }
 
     private void switchToMenuFrag() {
-
-        Log.d(TAG, "switchToMenuFrag: switched!");
-//        MenuFragment menuFragment = (MenuFragment) getSupportFragmentManager().findFragmentByTag(TAG_MENU_FRAGMENT);
-//        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-//        fragmentTransaction.detach(getSupportFragmentManager().findFragmentByTag(TAG_RECOMMENDATION_FRAGMENT));
-//        fragmentTransaction.attach(menuFragment);
-//        fragmentTransaction.addToBackStack(null);
-//        fragmentTransaction.commitAllowingStateLoss();
-//        getSupportFragmentManager().executePendingTransactions();
-
         RecommendationFragment recommendationFragment = (RecommendationFragment) getSupportFragmentManager().findFragmentByTag(TAG_RECOMMENDATION_FRAGMENT);
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.hide(recommendationFragment);
@@ -147,6 +115,18 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
         fragmentTransaction.commitAllowingStateLoss();
         getSupportFragmentManager().executePendingTransactions();
     }
+
+    /**
+     * Sign out
+     */
+    private void signOut() {
+        FirebaseAuth.getInstance().signOut();
+        Toast.makeText(this, "Signed Out", Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * Non-lifecycle callbacks
+     */
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -159,9 +139,14 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
         Bundle bundle = new Bundle();
         bundle.putString(Constants.ON_LOCATION_CLICKED_LOCATION_ID, locationId);
         bundle.putInt(Constants.ON_LOCATION_CLICKED_ROOM_ID, roomId);
-        RecommendationFragment recommendationFragment1 = (RecommendationFragment) fragmentManager.findFragmentByTag(TAG_RECOMMENDATION_FRAGMENT);
+        // Change the roomId that the fragment reads from
+        //RecommendationFragment recommendationFragment1 = (RecommendationFragment) fragmentManager.findFragmentByTag(TAG_RECOMMENDATION_FRAGMENT);
+        RecommendationFragment recommendationFragment1 = (RecommendationFragment) getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.view_pager + ":" + viewPager.getCurrentItem());
         recommendationFragment1.setArguments(bundle);
         recommendationFragment1.setItemRef(roomId);
+
+        //Fragment page = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.view_pager + ":" + viewPager.getCurrentItem());
+        Log.d(TAG, "onLocationClicked: " + recommendationFragment1.getTag());
     }
 
     @Override
@@ -228,16 +213,16 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
                 return true;
 
             case R.id.action_menu:
-                if (menuIconClicked) {
-                    // Odd number press
-                    menuIconClicked = false;
-                    switchToMenuFrag();
-
-                } else {
-                    // Even number press
-                    menuIconClicked = true;
-                    switchToRecommendationFrag();
-                }
+//                if (menuIconClicked) {
+//                    // Odd number press
+//                    menuIconClicked = false;
+//                    switchToMenuFrag();
+//
+//                } else {
+//                    // Even number press
+//                    menuIconClicked = true;
+//                    switchToRecommendationFrag();
+//                }
                 Log.d(TAG, "onOptionsItemSelected: button state" + menuIconClicked);
 
                 return true;
@@ -259,13 +244,5 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
 //        MenuItem menuItem = menu.findItem(R.id.action_menu);
 //        menuItem.setVisible(false);
         return true;
-    }
-
-    /**
-     * Sign out
-     */
-    private void signOut() {
-        FirebaseAuth.getInstance().signOut();
-        Toast.makeText(this, "Signed Out", Toast.LENGTH_LONG).show();
     }
 }

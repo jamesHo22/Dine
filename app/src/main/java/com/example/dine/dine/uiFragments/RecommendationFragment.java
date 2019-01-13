@@ -135,21 +135,6 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
             DataHandlingUtils.makePrefQuery(getContext(), itemRef);
             mAuth = FirebaseAuth.getInstance();
 
-//            // Get bundle data. Contains new locationId. Change location
-//            if (getArguments()!=null){
-//                Log.d(TAG, "onCreateView: getArguments is not null");
-//                // if the locations permission was granted and there is no saved instance, proceed to get the current location.
-//                // If not, use the location specified by the database.
-//                if (getArguments().getBoolean(Constants.TAG_ACCESS_FINE_LOCATION_PERMISSION_GRANTED)) {
-//                    getLocation();
-//                    Log.d(TAG, "onCreateView: permission granted");
-//                } else {
-//                    Log.d(TAG, "onCreateView: fragment refreshed");
-//                    int roomId = getArguments().getInt(Constants.ON_LOCATION_CLICKED_ROOM_ID);
-//                    setItemRef(roomId);
-//                }
-//            }
-
             // Get bundle data. Contains new locationId. Change location
             if (getArguments()!=null){
                 Log.d(TAG, "onCreateView: fragment refreshed");
@@ -185,7 +170,7 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
         rootView = inflater.inflate(R.layout.fragment_recommendation, container, false);
 
         FloatingActionButton mFloatingActionButton;
-        mFloatingActionButton = rootView.findViewById(R.id.fab);
+        mFloatingActionButton = getActivity().findViewById(R.id.fab);
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -293,7 +278,7 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
                 .setQuery(query, Item.class)
                 .build();
         mFirestoreAdapter = new FirestoreItemAdapter(options);
-        RecyclerView recyclerView = rootView.findViewById(R.id.rv_show_menu_items);
+        RecyclerView recyclerView = rootView.findViewById(R.id.rv_show_recommended_items);
         recyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
