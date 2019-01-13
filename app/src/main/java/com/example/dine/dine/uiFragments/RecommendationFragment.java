@@ -1,11 +1,13 @@
 package com.example.dine.dine.uiFragments;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -13,6 +15,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -53,6 +56,7 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
     /**
      * Variables
      */
+    private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 25;
     private String TAG = this.getClass().getName();
     private FirebaseAuth mAuth;
     // Add Firestore Reference
@@ -112,7 +116,6 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
             //source = Source.CACHE;
             Log.d(TAG, "onCreate: bundle not null");
         }
-
     }
 
     @Nullable
@@ -132,20 +135,46 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
             DataHandlingUtils.makePrefQuery(getContext(), itemRef);
             mAuth = FirebaseAuth.getInstance();
 
+//            // Get bundle data. Contains new locationId. Change location
+//            if (getArguments()!=null){
+//                Log.d(TAG, "onCreateView: getArguments is not null");
+//                // if the locations permission was granted and there is no saved instance, proceed to get the current location.
+//                // If not, use the location specified by the database.
+//                if (getArguments().getBoolean(Constants.TAG_ACCESS_FINE_LOCATION_PERMISSION_GRANTED)) {
+//                    getLocation();
+//                    Log.d(TAG, "onCreateView: permission granted");
+//                } else {
+//                    Log.d(TAG, "onCreateView: fragment refreshed");
+//                    int roomId = getArguments().getInt(Constants.ON_LOCATION_CLICKED_ROOM_ID);
+//                    setItemRef(roomId);
+//                }
+//            }
+
             // Get bundle data. Contains new locationId. Change location
             if (getArguments()!=null){
-                Log.d(TAG, "onCreateView: getArguments is not null");
-                // if the locations permission was granted and there is no saved instance, proceed to get the current location.
-                // If not, use the location specified by the database.
-                if (getArguments().getBoolean(Constants.TAG_ACCESS_FINE_LOCATION_PERMISSION_GRANTED)) {
-                    getLocation();
-                    Log.d(TAG, "onCreateView: permission granted");
+                Log.d(TAG, "onCreateView: fragment refreshed");
+                int roomId = getArguments().getInt(Constants.ON_LOCATION_CLICKED_ROOM_ID);
+                setItemRef(roomId);
+            } else {
+                // Check for or request for permissions
+                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // Permission is not granted
+                    // Should we show an explanation?
+                    Log.d(TAG, "onCreate: permission not granted");
+
+                    // No explanation needed; request the permission
+                    ActivityCompat.requestPermissions(getActivity(),
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+                    Log.d(TAG, "onCreate: permission requested");
+
                 } else {
-                    Log.d(TAG, "onCreateView: fragment refreshed");
-                    int roomId = getArguments().getInt(Constants.ON_LOCATION_CLICKED_ROOM_ID);
-                    setItemRef(roomId);
+                    // Permission already granted, get location
+                    Log.d(TAG, "onCreate: permission already granted");
+                    getLocation();
                 }
             }
+
         } else {
             // display error
             DataHandlingUtils dataHandlingUtils = new DataHandlingUtils();
@@ -153,7 +182,7 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
 
         }
 
-        rootView = inflater.inflate(R.layout.activity_food, container, false);
+        rootView = inflater.inflate(R.layout.fragment_recommendation, container, false);
 
         FloatingActionButton mFloatingActionButton;
         mFloatingActionButton = rootView.findViewById(R.id.fab);
@@ -187,7 +216,6 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
     /**
      * Non-LifeCycle Callbacks
      */
-
     // essentially a callback from LocationUtils
     @Override
     public void onLocationUpdate(Location location) {

@@ -201,12 +201,12 @@ public class FoodActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_food);
+        setContentView(R.layout.fragment_recommendation);
         roomDb = AppDatabase.getInstance(this);
         DataHandlingUtils.makePrefQuery(this, itemRef);
         mAuth = FirebaseAuth.getInstance();
         // Setup toolbar
-        myToolbar = findViewById(R.id.toolbar);
+        myToolbar = findViewById(R.id.toolbar_main);
         setSupportActionBar(myToolbar);
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
