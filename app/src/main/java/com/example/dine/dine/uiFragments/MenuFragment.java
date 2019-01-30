@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.dine.dine.Constants;
 import com.example.dine.dine.DataHandlingUtils;
 import com.example.dine.dine.Item;
 import com.example.dine.dine.R;
@@ -37,8 +38,8 @@ public class MenuFragment extends android.support.v4.app.Fragment {
     //Firestore recyclerview
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirestoreRecyclerAdapter mFirestoreAdapter;
-    private CollectionReference itemRef = db.collection("restaurants_2").document("0jfuPVFwXTLfLniskWeK").collection("menu_items");
     private static String mRestaurantDocumentId;
+    private CollectionReference itemRef;
 
     /**
      * Interfaces
@@ -50,6 +51,7 @@ public class MenuFragment extends android.support.v4.app.Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        itemRef = db.collection(Constants.PATH_RESTAURANT).document("gsruIzBRG2AZBGbbv7Uv").collection(Constants.PATH_MENU_ITEMS);
     }
 
 

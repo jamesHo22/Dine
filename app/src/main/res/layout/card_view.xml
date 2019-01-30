@@ -3,8 +3,96 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:animateLayoutChanges="true">
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/menu_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
+
+            <ImageView
+                android:id="@+id/main_image_view_menu"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/big_mac"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/text_layout_menu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/main_image_view"
+                android:layout_alignParentEnd="true"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/info_text_menu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif"
+                    android:text="menu_item"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/description_menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="sans-serif-light"
+                    android:text="Basic Description"
+                    android:textSize="12sp"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/price_menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:fontFamily="sans-serif-light"
+                    android:gravity="end"
+                    android:text="5.00" />
+
+
+                <!--<RelativeLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:orientation="horizontal">-->
+
+                <!--<ImageView-->
+                <!--android:id="@+id/expand_card"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_alignParentRight="true"-->
+                <!--app:srcCompat="@drawable/ic_local_dining_black_24dp"-->
+                <!--android:layout_margin="8dp" />-->
+
+                <!--</RelativeLayout>-->
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="#c0c0c0" />
+
+    </LinearLayout>
+
 
     <android.support.v7.widget.CardView
         android:id="@+id/card_view"
@@ -12,6 +100,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="4dp"
+        android:visibility="gone"
         app:cardCornerRadius="4dp">
 
         <LinearLayout
@@ -19,72 +108,70 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <RelativeLayout
+            <ImageView
+                android:id="@+id/main_image_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="240dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/big_mac" />
 
-                <ImageView
-                    android:id="@+id/main_image_view"
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:scaleType="centerCrop"
-                    android:layout_margin="4dp"
-                    android:src="@mipmap/big_mac" />
+            <LinearLayout
+                android:id="@+id/text_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/main_image_view"
+                android:layout_alignParentEnd="true"
+                android:orientation="horizontal">
 
-                <LinearLayout
-                    android:id="@+id/text_layout"
+                <TextView
+                    android:id="@+id/info_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif"
+                    android:text="menu_item"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/description"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_alignParentEnd="true"
-                    android:layout_toEndOf="@+id/main_image_view">
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="sans-serif-light"
+                    android:text="Basic Description"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
 
-                    <TextView
-                        android:id="@+id/info_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-light"
-                        android:layout_margin="8dp"
-                        android:text="menu_item"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/description"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="8dp"
-                        android:fontFamily="sans-serif-light"
-                        android:text="Basic Description" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/price"
-                        android:text="5.00"
-                        android:layout_margin="8dp"
-                        android:layout_gravity="start"/>
+                <TextView
+                    android:id="@+id/price"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-light"
+                    android:gravity="end"
+                    android:text="5.00" />
 
 
-                    <!--<RelativeLayout-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:orientation="horizontal">-->
+                <!--<RelativeLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:orientation="horizontal">-->
 
-                    <!--<ImageView-->
-                    <!--android:id="@+id/expand_card"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_alignParentRight="true"-->
-                    <!--app:srcCompat="@drawable/ic_local_dining_black_24dp"-->
-                    <!--android:layout_margin="8dp" />-->
+                <!--<ImageView-->
+                <!--android:id="@+id/expand_card"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_alignParentRight="true"-->
+                <!--app:srcCompat="@drawable/ic_local_dining_black_24dp"-->
+                <!--android:layout_margin="8dp" />-->
 
-                    <!--</RelativeLayout>-->
+                <!--</RelativeLayout>-->
 
-                </LinearLayout>
-
-            </RelativeLayout>
+            </LinearLayout>
 
             <Button
                 android:id="@+id/order_dish"

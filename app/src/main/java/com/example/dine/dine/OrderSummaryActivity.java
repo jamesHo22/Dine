@@ -117,11 +117,16 @@ public class OrderSummaryActivity extends AppCompatActivity implements RoomRecyc
                 // Get sum of price
                 //FIXME: probably put this in another method
                 float sum = 0;
-                for(int i = 0; i<itemEntries.size(); i++) {
-                    sum += (float) itemEntries.get(i).getPrice();
-                    Log.d(TAG, "onChanged: sum of items " + sum);
-                    mSumTv.setText("$" + String.format("%.02f", sum/100));
+                if (itemEntries.size()!=0) {
+                    for(int i = 0; i<itemEntries.size(); i++) {
+                        sum += (float) itemEntries.get(i).getPrice();
+                        Log.d(TAG, "onChanged: sum of items " + sum);
+                        mSumTv.setText("$" + String.format("%.02f", sum/100));
+                    }
+                } else {
+                    mSumTv.setText("$" + String.format("%.02f", 0.0/100));
                 }
+
             }
         });
 

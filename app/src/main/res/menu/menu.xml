@@ -7,10 +7,10 @@
         android:title="@string/change_location"
         android:icon="@drawable/ic_edit_location_black_24dp"/>
 
-    <item android:id="@+id/action_menu"
-        android:title="@string/see_full_menu"
-        app:showAsAction="always"
-        android:icon="@drawable/ic_restaurant_menu_white_24dp"/>
+    <!--<item android:id="@+id/action_menu"-->
+        <!--android:title="@string/see_full_menu"-->
+        <!--app:showAsAction="always"-->
+        <!--android:icon="@drawable/ic_restaurant_menu_white_24dp"/>-->
 
     <!--&lt;!&ndash; Settings, should always be in the overflow &ndash;&gt;-->
 

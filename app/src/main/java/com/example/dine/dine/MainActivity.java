@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
     ViewPagerFragmentAdapter pagerAdapter;
     private TabLayout tabLayout;
 
-
     /**
      * Lifecycle Callbacks
      */
@@ -158,8 +157,9 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
-                    Log.d(TAG, "onRequestPermissionResult: permission already granted");
+                    Log.d(TAG, "onRequestPermissionResult: permission granted");
                     RecommendationFragment recommendationFragment = (RecommendationFragment) fragmentManager.findFragmentByTag(TAG_RECOMMENDATION_FRAGMENT);
+                    // FIXME: Upon first install, recommendationFragment is null.
                     recommendationFragment.getLocation();
                 } else {
                     // permission denied, boo! Disable the
@@ -210,21 +210,6 @@ public class MainActivity extends AppCompatActivity implements BottomSheetDialog
                 Intent signOutIntent = new Intent(this, SignInActivity.class);
                 startActivity(signOutIntent);
                 finish();
-                return true;
-
-            case R.id.action_menu:
-//                if (menuIconClicked) {
-//                    // Odd number press
-//                    menuIconClicked = false;
-//                    switchToMenuFrag();
-//
-//                } else {
-//                    // Even number press
-//                    menuIconClicked = true;
-//                    switchToRecommendationFrag();
-//                }
-                Log.d(TAG, "onOptionsItemSelected: button state" + menuIconClicked);
-
                 return true;
 
             default:

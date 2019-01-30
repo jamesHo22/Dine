@@ -26,6 +26,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -42,10 +43,6 @@ public class DataHandlingUtils {
 
     private final static String TAG = DataHandlingUtils.class.getSimpleName();
     private AppDatabase roomDb;
-    public static final String DOCUMENT_ID = "document_id";
-
-    public static void DataHandlingUtils() {
-    }
 
     /**
      * todo: FIRESTORE COST: R = 0:10, W = 0, D = 0
@@ -56,17 +53,18 @@ public class DataHandlingUtils {
      */
     public void getLocations(final Location mCurrentLocation, final Context context){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        CollectionReference itemRef = db.collection("restaurants_2");
+        CollectionReference itemRef = db.collection(context.getString(R.string.PATH_RESTAURANT));
         itemRef.limit(10).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 for (int i = 0; i < queryDocumentSnapshots.getDocuments().size(); i++) {
                     DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(i);
                     String location_id = documentSnapshot.getId();
-                    String name = documentSnapshot.getString("name");
-                    String address = documentSnapshot.getString("address");
-                    double latitude = documentSnapshot.getGeoPoint("lat_long").getLatitude();
-                    double longitude = documentSnapshot.getGeoPoint("lat_long").getLongitude();
+                    String name = documentSnapshot.getString(Constants.FIELD_RESTAURANT_NAME);
+                    String address = documentSnapshot.getString(Constants.FIELD_ADDRESS);
+                    GeoPoint mGeoPoint = (GeoPoint) documentSnapshot.get(Constants.FIELD_LOCATION_LAT_LONG);
+                    double latitude = mGeoPoint.getLatitude();
+                    double longitude = mGeoPoint.getLongitude();
                     // Use current location to calculate distance
                     Location POI = new Location("current location");
                     POI.setLatitude(latitude);
@@ -87,6 +85,7 @@ public class DataHandlingUtils {
      * @param itemRef is the initial path to the collection
      * @param preferences is a List of booleans that represent the user set preferences
      * @return a Query object that is used to call Firestore.
+     * FIXME: change the query to work with the updated chipsDietRestriction data
      */
     public static Query buildQuery(Query itemRef, List<Boolean> preferences) {
         boolean first_count = true;
@@ -108,17 +107,17 @@ public class DataHandlingUtils {
 
             } else if (gluten_free_count && preferences.get(0)) {
                 gluten_free_count = false;
-                newQuery = newQuery.whereEqualTo("gluten_free", true);
+                newQuery = newQuery.whereArrayContains(Constants.FIELD_CHIPS_DIET_RESTRICTION, Constants.VALUE_GLUTEN_FREE);
                 Log.d(TAG, "buildQuery: gluten_count is " + String.valueOf(gluten_free_count));
 
             } else if (vegan_count && preferences.get(1)) {
                 vegan_count = false;
-                newQuery = newQuery.whereEqualTo("vegan", true);
+                newQuery = newQuery.whereArrayContains(Constants.FIELD_CHIPS_DIET_RESTRICTION, Constants.VALUE_VEGAN);
                 Log.d(TAG, "buildQuery: vegan_count is " + String.valueOf(vegan_count));
 
             } else if (vegetarian_count && preferences.get(2)) {
                 vegetarian_count = false;
-                newQuery = newQuery.whereEqualTo("vegetarian", true);
+                newQuery = newQuery.whereArrayContains(Constants.FIELD_CHIPS_DIET_RESTRICTION, Constants.VALUE_VEGETARIAN);
                 Log.d(TAG, "buildQuery: vegetarian_count is " + String.valueOf(vegetarian_count));
             } else if (areAllFalse(preferences)) {
                 newQuery = itemRef;

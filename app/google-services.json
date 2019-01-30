@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "225994583249",
-    "firebase_url": "https://dine-edd66.firebaseio.com",
-    "project_id": "dine-edd66",
-    "storage_bucket": "dine-edd66.appspot.com"
+    "project_number": "728285089826",
+    "firebase_url": "https://dinedishes.firebaseio.com",
+    "project_id": "dinedishes",
+    "storage_bucket": "dinedishes.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:225994583249:android:d9414269de5258dd",
+        "mobilesdk_app_id": "1:728285089826:android:d9414269de5258dd",
         "android_client_info": {
           "package_name": "com.example.dine.dine"
         }
       },
       "oauth_client": [
         {
-          "client_id": "225994583249-lbbo2rmpm3v1avu50jf1qeof29clfaao.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.dine.dine",
-            "certificate_hash": "0fbe805509446ff5ccf1e4d287fd6d88722e2b7a"
-          }
-        },
-        {
-          "client_id": "225994583249-l9s78aarknod60m5n3acco1qt5mfcerg.apps.googleusercontent.com",
+          "client_id": "728285089826-lpuj9slpt0i70iaqg6u2ubk676sq9mg0.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDtwz64MBc1SpSUmBBA9T66YQQZ7IPNbb0"
+          "current_key": "AIzaSyCWM-Hx6ieFohhzHuuByIJu64xLp_Txo2s"
         }
       ],
       "services": {
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "225994583249-l9s78aarknod60m5n3acco1qt5mfcerg.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

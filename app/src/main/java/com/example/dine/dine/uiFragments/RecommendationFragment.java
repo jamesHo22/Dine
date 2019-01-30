@@ -233,7 +233,7 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
                     //if the documentId exists, check if the firestore document with the same ID exists
                     if (documentId!=null) {
                         // Document ID exists, check Firestore
-                        db.collection("restaurants_2")
+                        db.collection(Constants.PATH_RESTAURANT)
                                 .document(documentId)
                                 .get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                             @Override
@@ -241,9 +241,9 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
                                 Boolean exists = task.getResult().exists();
                                 if (exists) {
                                     // Firestore doc exists: set itemRef to that document and change the toolbar name
-                                    itemRef = db.collection("restaurants_2")
+                                    itemRef = db.collection(Constants.PATH_RESTAURANT)
                                             .document(documentId)
-                                            .collection("menu_items");
+                                            .collection(Constants.PATH_MENU_ITEMS);
                                     Log.d(TAG, "setItemRef: " + itemRef.getPath() + "documentID: " + documentId);
                                     String name = locationEntry.getName();
                                     mCallBack.toolBarSetup(name);
@@ -341,11 +341,11 @@ public class RecommendationFragment extends android.support.v4.app.Fragment impl
 
                 //Make a new intent and pass this document ID into it as a string Extra
                 Intent detailIntent = new Intent(getContext(), ItemDetailsActivity.class);
-                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_DOCUMENT_ID, document_id);
-                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_KEY_DETAILED_TITLE, title);
-                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_KEY_DETAILED_DESCRIPTION, description);
-                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_KEY_DETAILED_PRICE, price);
-                detailIntent.putExtra(ItemDetailsActivity.INTENT_EXTRA_KEY_LOCATION_ID, mRestaurantDocumentId);
+                detailIntent.putExtra(Constants.INTENT_EXTRA_DOCUMENT_ID, document_id);
+                detailIntent.putExtra(Constants.INTENT_EXTRA_KEY_DETAILED_TITLE, title);
+                detailIntent.putExtra(Constants.INTENT_EXTRA_KEY_DETAILED_DESCRIPTION, description);
+                detailIntent.putExtra(Constants.INTENT_EXTRA_KEY_DETAILED_PRICE, price);
+                detailIntent.putExtra(Constants.INTENT_EXTRA_KEY_LOCATION_ID, mRestaurantDocumentId);
                 Log.d(TAG, "onItemClick: " + mRestaurantDocumentId);
                 startActivity(detailIntent);
             }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Dine</string>
+    <string name="app_name">Dine Dishes</string>
     <string name="sign_out">Sign Out</string>
     <string name="make_data">make data</string>
     <string name="hello">Hello!</string>
@@ -18,4 +18,11 @@
     <string name="num_points">%1$d/</string>
     <string name="tab_recommendations">Recommendations</string>
     <string name="tab_menu">Menu</string>
+
+    <!--DATABASE PATH STRINGS-->
+    <string name="PATH_RESTAURANT">restaurants_2</string>
+    <string name="PATH_MENU_ITEMS">menuItems</string>
+    <string name="FIELD_RESTAURANT_NAME">restaurantName</string>
+    <string name="FIELD_ADDRESS">address</string>
+    <string name="FIELD_LOCATION_LAT_LONG">location.lat_long</string>
 </resources>
