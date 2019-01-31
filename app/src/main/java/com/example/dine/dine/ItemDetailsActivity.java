@@ -76,7 +76,8 @@ public class ItemDetailsActivity extends AppCompatActivity {
         CollectionReference itemRef = db.collection(Constants.PATH_RESTAURANT)
                 .document(restaurantDocumentId)
                 .collection(Constants.PATH_MENU_ITEMS);
-        Log.d(TAG, "onCreate: " + document_id);
+        Log.d(TAG, "onCreate: menuId: " + document_id);
+        Log.d(TAG, "onCreate: restaurantId: " + restaurantDocumentId);
 
         //Find the views.
         final TextView detailed_description_tv = findViewById(R.id.detailed_description_tv);

@@ -17,6 +17,7 @@ import com.example.dine.dine.RoomDb.AppDatabase;
 import com.example.dine.dine.RoomDb.ItemEntry;
 import com.example.dine.dine.RoomDb.LocationEntry;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -186,14 +187,11 @@ public class DataHandlingUtils {
             String orderer = currentUser.getDisplayName();
 
             final Map<String, Object> orderInfo = new HashMap<>();
-            orderInfo.put("ordered_by", orderer);
-            orderInfo.put("order_time", FieldValue.serverTimestamp());
-            orderInfo.put("menu_item_ids", idArray);
-            Log.d(TAG, "orderItems: " + orderInfo.get("menu_item_ids"));
+            orderInfo.put(Constants.FIELD_ORDERED_BY, orderer);
+            orderInfo.put(Constants.FIELD_ORDER_TIME, FieldValue.serverTimestamp());
+            orderInfo.put(Constants.FIELD_MENU_ITEM_IDS, Arrays.asList(idArray.toArray()));
 
-            Log.d(TAG, "orderItems: ");
-
-            db.collection("users_2")
+            db.collection(Constants.PATH_USERS)
                     .document(user_id)
                     .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
@@ -201,17 +199,30 @@ public class DataHandlingUtils {
                     Boolean exists = task.getResult().exists();
                     if (exists) {
                         Log.d(TAG, "orderItems: user exists. Set order info in their path");
-                        CollectionReference itemRef = buildFirestoreUserReference(user_id, db).collection("order_info");
+                        CollectionReference itemRef = buildFirestoreUserReference(user_id, db).collection(Constants.PATH_ORDER_INFO);
                         db.collection(itemRef.getPath()).document()
-                                .set(orderInfo);
+                                .set(orderInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "onSuccess: Yay! successfully added order information to the users path!");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d(TAG, "onFailure: Failed to save order information to path :(");
+                                e.printStackTrace();
+                            }
+                        });
+                        Log.d(TAG, "onComplete: orderitems" + orderInfo.toString());
                     } else {
                         Log.d(TAG, "orderItems: user did not exist. Create user document and set order info to it.");
                         final Map<String, Object> userInfo = new HashMap<>();
                         userInfo.put("user_created_at", FieldValue.serverTimestamp());
-                        db.collection("users_2")
+                        db.collection(Constants.PATH_USERS)
                                 .document(user_id)
                                 .set(userInfo);
-                        CollectionReference itemRef = buildFirestoreUserReference(user_id, db).collection("order_info");
+                        CollectionReference itemRef = buildFirestoreUserReference(user_id, db).collection(Constants.PATH_ORDER_INFO);
                         db.collection(itemRef.getPath()).document()
                                 .set(orderInfo);
                     }

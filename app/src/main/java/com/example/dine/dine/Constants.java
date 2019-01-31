@@ -31,6 +31,11 @@ public class Constants {
     public static final String FIELD_FILE = "file";
     public static final String FIELD_TITLE = "title";
     public static final String FIELD_DESCRIPTION = "description";
+    public static final String FIELD_ORDERED_BY = "orderedBy";
+    public static final String FIELD_ORDER_TIME = "orderTime";
+    public static final String FIELD_MENU_ITEM_IDS = "menuItemIds";
+    public static final String PATH_USERS = "users_2";
+    public static final String PATH_ORDER_INFO = "order_info";
 
     /**
      * Shared Preferences Variables/Keys
